@@ -9,3 +9,15 @@ test('missing edition, bad HTTP and invalid inputs fail closed',async()=>{await 
 
 test('reject globally shifted Malay ayat even if local index matches',()=>{const verses=[{number:8,numberInSurah:1},{number:9,numberInSurah:2}];const payload=response('ms.basmeih');payload.data.ayahs=[{number:9,numberInSurah:1,text:'shifted'},{number:10,numberInSurah:2,text:'shifted'}];assert.throws(()=>validateTranslationSurah(payload,1,editions[0],verses),/Translation ayah mismatch/)});
 test('reject translation from wrong surah even with matching local ayah',()=>{const payload=response('ms.basmeih');payload.data.ayahs[0].surah={number:2};assert.throws(()=>validateTranslationSurah(payload,1,editions[0],arabic),/Translation ayah mismatch/)});
+
+test('network failure is explicit and cannot fabricate Malay translation',async()=>{await assert.rejects(loadTranslationSurah(2,'ms',[{number:8,numberInSurah:1}],{fetchImpl:async()=>{throw new TypeError('Failed to fetch')}}),/Failed to fetch/)});
+test('Al-Baqarah 2:1 and 2:2 remain bound to their own global ayah IDs',async()=>{
+ const arabicVerses=[{number:8,numberInSurah:1,arabic:'الٓمٓ'},{number:9,numberInSurah:2,arabic:'ذَٰلِكَ الْكِتَابُ'}];
+ const payload={status:'OK',data:{number:2,edition:{identifier:'ms.basmeih',type:'translation'},ayahs:[{number:8,numberInSurah:1,text:'Alif, Laam, Miim.'},{number:9,numberInSurah:2,text:'Kitab Al-Quran ini, tidak ada sebarang syak padanya.'}]}};
+ const fetchImpl=async url=>({ok:true,json:async()=>url.includes('/edition?')?{status:'OK',data:editions}:structuredClone(payload)});
+ const result=await loadTranslationSurah(2,'ms',arabicVerses,{fetchImpl});
+ assert.equal(result.verses.get(1),'Alif, Laam, Miim.');
+ assert.match(result.verses.get(2),/^Kitab Al-Quran/);
+ const swapped=structuredClone(payload);[swapped.data.ayahs[0].number,swapped.data.ayahs[1].number]=[9,8];
+ assert.throws(()=>validateTranslationSurah(swapped,2,editions[0],arabicVerses),/Translation ayah mismatch/);
+});
