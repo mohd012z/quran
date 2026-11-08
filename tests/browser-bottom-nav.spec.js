@@ -1,3 +1,4 @@
+import{attachQuranNetworkDiagnostics}from './quran-playwright-network.mjs';
 import{test,expect}from '@playwright/test';
 import{mkdir,writeFile}from 'node:fs/promises';
 import{observeQuranRequests}from '../src/quran-playwright-observer.js';
@@ -72,4 +73,22 @@ test('redacted browser network evidence with deterministic Arabic and Basmeih mo
  expect(records.some(x=>x.endpoint==='malay-basmeih'&&x.status===200)).toBeTruthy();
  await mkdir('test-results',{recursive:true});await writeFile('test-results/quran-network-redacted.json',JSON.stringify(records,null,2));
  observer.stop();
+});
+
+test('Al-Baqarah 2:1/2:2 mocked API diagnostic records are redacted',async({page})=>{
+ const records=[];const detach=attachQuranNetworkDiagnostics(page,records);
+ await page.route('https://api.alquran.cloud/v1/surah/2/ms.basmeih',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({status:'ERROR',data:null})}));
+ const response=await page.evaluate(async()=>{try{const r=await fetch('https://api.alquran.cloud/v1/surah/2/ms.basmeih');return r.status}catch{return -1}});
+ expect(response).toBe(503);
+ expect(records).toContainEqual({endpoint:'malay-2',event:'response',status:503,kind:'HTTP'});
+ expect(JSON.stringify(records)).not.toMatch(/https:|token|بسم|Alif/);
+ detach();
+});
+test('Arabic quran-uthmani network failure has safe endpoint evidence',async({page})=>{
+ const records=[];const detach=attachQuranNetworkDiagnostics(page,records);
+ await page.route('https://api.alquran.cloud/v1/surah/2/quran-uthmani',route=>route.abort('failed'));
+ await page.evaluate(async()=>{try{await fetch('https://api.alquran.cloud/v1/surah/2/quran-uthmani')}catch{}});
+ await expect.poll(()=>records.length).toBeGreaterThan(0);
+ expect(records.some(x=>x.endpoint==='arabic-2'&&x.event==='requestfailed'&&x.kind==='NETWORK_UNDETERMINED')).toBe(true);
+ detach();
 });
