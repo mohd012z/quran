@@ -18,7 +18,7 @@ export function parseJakimDate(value){
  const check=new Date(Date.UTC(y,m-1,d));if(check.getUTCFullYear()!==y||check.getUTCMonth()!==m-1||check.getUTCDate()!==d)return null;
  return [y,String(m).padStart(2,'0'),String(d).padStart(2,'0')].join('-');
 }
-function parseTime(value){if(typeof value!=='string')return null;const x=value.trim();if(validPrayerTime(x))return x;if(/^([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$/.test(x))return x.slice(0,5);const m=/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(x);if(!m)return null;let h=Number(m[1]);if(h<1||h>12)return null;h=h%12+(m[3].toUpperCase()==='PM'?12:0);return String(h).padStart(2,'0')+':'+m[2]}
+function parseTime(value){if(typeof value!=='string')return null;const x=value.trim();if(validPrayerTime(x))return x;if(/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(x))return x.slice(0,5);const m=/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(x);if(!m)return null;let h=Number(m[1]);if(h<1||h>12)return null;h=h%12+(m[3].toUpperCase()==='PM'?12:0);return String(h).padStart(2,'0')+':'+m[2]}
 export function normalizeJakimResponse(payload,zone,expectedDate){
  if(!JAKIM_ZONES.some(z=>z.code===zone))throw Error('Zon belum disokong');
  const rows=payload?.prayerTime;if(!Array.isArray(rows)||rows.length!==1)throw Error('Rekod JAKIM tidak lengkap');
