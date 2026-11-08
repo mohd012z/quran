@@ -92,3 +92,15 @@ test('Arabic quran-uthmani network failure has safe endpoint evidence',async({pa
  expect(records.some(x=>x.endpoint==='arabic-2'&&x.event==='requestfailed'&&x.kind==='NETWORK_UNDETERMINED')).toBe(true);
  detach();
 });
+
+for(const size of sizes){test(size.name+' last verse remains reachable above fixed bottom dock',async({page})=>{
+ await page.setViewportSize(size);await page.goto('/');
+ const cards=page.locator('.ayah-card');await expect(cards.first()).toBeVisible({timeout:15000});
+ const last=cards.last();await last.scrollIntoViewIfNeeded();
+ await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
+ await expect.poll(async()=>last.evaluate(el=>{const card=el.getBoundingClientRect(),nav=document.querySelector('.bottom-reader-tabs'),dock=nav?.getBoundingClientRect(),visible=nav&&!nav.classList.contains('nav-hidden');return {cardBottom:Math.round(card.bottom),dockTop:Math.round(visible?dock.top:innerHeight),viewport:innerHeight,scrollEnd:Math.abs(window.scrollY+innerHeight-document.documentElement.scrollHeight)<=2}})).toMatchObject({scrollEnd:true});
+ const metrics=await last.evaluate(el=>{const r=el.getBoundingClientRect(),nav=document.querySelector('.bottom-reader-tabs'),dock=nav?.getBoundingClientRect();return {cardBottom:r.bottom,dockTop:nav&&!nav.classList.contains('nav-hidden')?dock.top:innerHeight,viewport:innerHeight,buttons:[...el.querySelectorAll('.ayah-actions button')].map(b=>({width:b.getBoundingClientRect().width,height:b.getBoundingClientRect().height}))}});
+ expect(metrics.cardBottom).toBeLessThanOrEqual(metrics.dockTop+1);
+ for(const b of metrics.buttons){expect(b.width).toBeGreaterThanOrEqual(44);expect(b.height).toBeGreaterThanOrEqual(44)}
+ await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/last-ayah-safe-'+size.name+'.png'});
+});}
