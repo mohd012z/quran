@@ -5,7 +5,7 @@ import{readMushaf,saveMushaf,swipeDirection,nextRepeatCount}from './mushaf.js';
 import{renderSegments}from './tajweed.js';
 import SolatPanel from './solat-panel.jsx';
 import{shareVerseNative,shareDestination,verseShareText,verseUrl}from './share-ayah.js';
-import{shareVerseImage,createVerseCard}from './verse-card.js';
+import{shareVerseImage}from './verse-card.js';
 import{QARIS,audioUrl}from './qari.js';
 import{readBookmarks,toggleBookmark}from './bookmarks.js';
 import{DEFAULT_READER_SETTINGS,TAJWEED_RULES,filterVerses,loadReaderSettings,saveReaderSettings}from './reader.js';
