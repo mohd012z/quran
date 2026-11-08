@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{HIJRI_MONTHS,HISTORY_TOPICS,hijriToday,searchHistory}from '../src/islamic-calendar.js';
+test('twelve unique Islamic months in canonical order',()=>{assert.equal(HIJRI_MONTHS.length,12);assert.equal(new Set(HIJRI_MONTHS).size,12);assert.equal(HIJRI_MONTHS[0],'Muharram');assert.equal(HIJRI_MONTHS[8],'Ramadan')});
+test('historical topics have valid scoped dates and source URLs',()=>{for(const h of HISTORY_TOPICS){assert.ok(h.month===null||(h.month>=1&&h.month<=12));assert.ok(h.day===null||(h.day>=1&&h.day<=30));for(const ref of h.references)assert.ok(ref.startsWith('https://'))}});
+test('history filtering supports Malay categories',()=>{assert.ok(searchHistory('Hijrah','sirah').length>0);assert.equal(searchHistory('Hijrah','ibadah').length,0);assert.deepEqual(searchHistory('nonsense'),[])});
+test('Hijri formatting rejects invalid dates',()=>{assert.throws(()=>hijriToday(new Date(NaN)),/Invalid date/);assert.equal(typeof hijriToday(new Date(2026,10,8)),'string')});
