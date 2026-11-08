@@ -20,7 +20,7 @@ export function searchDuas(query='',category='all'){
  const q=String(query).trim().toLocaleLowerCase('ms');
  return QURAN_DUAS.filter(d=>(category==='all'||d.category===category)&&(!q||[d.title,d.id,d.category].some(v=>v.toLocaleLowerCase('ms').includes(q))));
 }
-export function validReminderTime(value){return typeof value==='string'&&/^([01]\\d|2[0-3]):[0-5]\\d$/.test(value)}
+export function validReminderTime(value){return typeof value==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(value)}
 export function reminderDue(now,reminder,lastShownDate){
  if(!reminder?.enabled||!validReminderTime(reminder.time)||!(now instanceof Date)||!Number.isFinite(now.getTime()))return false;
  const date=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
