@@ -32,7 +32,7 @@ for(const size of sizes){test(size.name+' bottom dock screenshot and accessibili
 
 for(const size of sizes){test(size.name+' compact reader toolbar and advanced disclosure',async({page})=>{
  await page.setViewportSize(size);await page.goto('/');
- const options=page.locator('details.reader-mobile-options');await expect(options).toBeVisible();await expect(options).not.toHaveAttribute('open','');await options.locator('summary').click();
+ const options=page.locator('details.reader-mobile-options');await expect(options).toBeVisible();await expect(options).not.toHaveAttribute('open','');await expect(options.locator(':scope > summary')).toHaveCount(1);await options.locator(':scope > summary').click();
  const toolbar=page.locator('.reader-toolbar');await expect(toolbar).toBeVisible();
  await expect(toolbar.getByRole('combobox',{name:'Pilih Surah'})).toBeVisible();
  await expect(toolbar.getByRole('textbox',{name:'Cari ayat'})).toBeVisible();
@@ -252,8 +252,8 @@ for(const size of sizes)test('compact reader prioritizes actual ayah: '+size.nam
  const rect=await first.evaluate(el=>({top:el.getBoundingClientRect().top,width:el.getBoundingClientRect().width,viewport:innerWidth}));
  expect(rect.top).toBeLessThan(size.height);
  expect(rect.width).toBeLessThanOrEqual(rect.viewport+1);
- await options.locator('summary').click();
+ await options.locator(':scope > summary').click();
  await expect(page.getByRole('group',{name:'Pilihan bacaan Khat dan audio'})).toBeVisible();
- await options.locator('summary').click();
+ await options.locator(':scope > summary').click();
  await expect(options).not.toHaveAttribute('open','');
 });
