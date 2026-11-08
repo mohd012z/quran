@@ -100,7 +100,7 @@ jobs:
           test -x "$APKSIGNER"
           "$APKSIGNER" verify --verbose --print-certs "$APK" | tee apk-signing.txt
           grep -Fq "Verified using v2 scheme" apk-signing.txt
-          grep -Fq "Signer #1 certificate SHA-256 digest:" apk-signing.txt
+          grep -Eq "^(V2 Signer|Signer #1): certificate SHA-256 digest: [0-9a-f]{64}$" apk-signing.txt
       - uses: actions/upload-artifact@v4
         with:
           name: quran-research-debug-apk
