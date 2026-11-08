@@ -4,11 +4,9 @@ import{installLayoutQuranMocks,layoutQuranPayload}from './quran-layout-fixture.m
 const API='https://api.alquran.cloud/v1';
 const arabic=API+'/surah/1/quran-uthmani';
 const malay=API+'/surah/1/ms.basmeih';
-const records=[];
 async function setup(page){await installLayoutQuranMocks(page);await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')})}
 async function mutate(page,url,change){const base=layoutQuranPayload(url);if(!base)throw Error('Fixture not allowed');const copy=structuredClone(base);change(copy);await page.route(url,route=>route.fulfill({status:200,headers:{'access-control-allow-origin':'*'},json:copy}))}
-async function record(caseId,expected){records.push({caseId,expected,fixture:'synthetic',liveNetwork:false})}
-test.afterAll(async()=>{await mkdir('test-results',{recursive:true});await writeFile('test-results/quran-fixture-negative-evidence.json',JSON.stringify({schemaVersion:1,records},null,2)+'\n')});
+async function record(caseId,expected){await mkdir('test-results',{recursive:true});await writeFile('test-results/quran-fixture-negative-'+caseId+'.json',JSON.stringify({schemaVersion:1,caseId,expected,fixture:'synthetic',liveNetwork:false},null,2)+'\n')}
 test('unexpected Quran endpoint and query are blocked without fallback',async({page})=>{
  await setup(page);await page.goto('/');
  for(const url of [API+'/surah/1/unreviewed',arabic+'?token=secret',API+'/edition?language=ms',API+'/surah/2/quran-uthmani']){
