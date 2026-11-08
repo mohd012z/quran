@@ -1,11 +1,5 @@
 import React,{useEffect,useRef,useState}from 'react';
-export const NAV_ITEMS=Object.freeze([['baca','Baca'],['belajar','Belajar'],['tarannum','Tarannum'],['sejarah','Sejarah Nabi'],['kalendar','Kalendar Islam'],['doa','Doa Harian'],['solat','Solat & Wirid'],['ilmu','Ilmu Islam'],['rujukan','Rujukan'],['cari','Cari'],['tetapan','Tetapan']]);
-export function nextBottomNavVisibility({previousY,currentY,visible,threshold=12}){
- if(!Number.isFinite(previousY)||!Number.isFinite(currentY))return true;
- if(currentY<80)return true;
- if(Math.abs(currentY-previousY)<threshold)return visible;
- return currentY<previousY;
-}
+import{NAV_ITEMS,nextBottomNavVisibility}from './bottom-navigation-logic.js';
 export default function BottomNavigation({active,onNavigate}){
  const[visible,setVisible]=useState(true),lastY=useRef(0);
  useEffect(()=>{lastY.current=window.scrollY;const scroll=()=>{const current=window.scrollY;setVisible(old=>nextBottomNavVisibility({previousY:lastY.current,currentY,visible:old}));if(Math.abs(current-lastY.current)>=12)lastY.current=current};window.addEventListener('scroll',scroll,{passive:true});return()=>window.removeEventListener('scroll',scroll)},[]);
