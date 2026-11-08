@@ -93,3 +93,14 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .arabic-word:focus-visible{outline:3px solid #147f66;outline-offset:2px}
 [data-theme=dark] .arabic-word.word-active{background:#215b4c;color:#fff}
 @media(max-width:440px){.ayah-actions span{flex-basis:auto;margin-right:auto}.ayah-actions button{padding:.3rem .4rem}.ayah-share button,.ayah-share a{flex:1 1 92px}.reading-controls{gap:.35rem;padding:.5rem}.reading-controls>label,.reading-controls>button{flex:1 1 125px}}
+
+/* Dense icon-first controls retain accessible touch hit areas. */
+.ayah-actions button{min-width:44px;min-height:44px;padding:.2rem .35rem;font-size:.82rem}
+.ayah-actions{gap:.2rem}
+.ayah-share button{font-size:.8rem}
+.speaker-button{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.speaker-button span[aria-hidden]{display:inline-block;transform-origin:center}
+.speaker-button.is-playing span[aria-hidden]{animation:quran-speaker-pulse .85s ease-in-out infinite alternate}
+@keyframes quran-speaker-pulse{from{transform:scale(1);opacity:.7}to{transform:scale(1.2);opacity:1}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(prefers-reduced-motion:reduce){.speaker-button.is-playing span[aria-hidden]{animation:none}}
