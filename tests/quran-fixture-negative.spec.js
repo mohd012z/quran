@@ -44,3 +44,21 @@ for(const [caseId,change]of [
   await record(caseId,'translation-rejected');
  });
 }
+
+test('malay-wrong-surah rejects translation without corrupting Arabic cards',async({page})=>{
+ await setup(page);await mutate(page,malay,p=>p.data.number=2);await page.goto('/');
+ await expect(page.locator('.ayah-card')).toHaveCount(7);
+ await expect(page.locator('.verse-translation').first()).toContainText('Terjemahan tidak tersedia');
+ await expect(page.locator('.verse-translation').first()).not.toContainText('MALAY_FIXTURE_1');
+ await record('malay-wrong-surah','translation-rejected');
+});
+test('malay-metadata-identity mismatch is rejected before translation request',async({page})=>{
+ await setup(page);
+ const url=API+'/edition?format=text&language=ms&type=translation';
+ await mutate(page,url,p=>p.data[0].language='id');
+ await page.goto('/');
+ await expect(page.locator('.ayah-card')).toHaveCount(7);
+ await expect(page.locator('.verse-translation').first()).toContainText('Terjemahan tidak tersedia');
+ await expect(page.locator('.verse-translation').first()).not.toContainText('MALAY_FIXTURE_1');
+ await record('malay-metadata-language','translation-rejected');
+});
