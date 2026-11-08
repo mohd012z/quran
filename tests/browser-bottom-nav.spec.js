@@ -39,3 +39,14 @@ for(const size of sizes){test(size.name+' compact reader toolbar and advanced di
  await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-'+size.name+'.png',fullPage:true});
  await disclosure.locator('summary').focus();await page.keyboard.press('Enter');await expect(disclosure).not.toHaveAttribute('open','');
 });}
+
+for(const size of sizes){test(size.name+' ayah Arabic translation visual isolation',async({page})=>{
+ await page.setViewportSize(size);await page.goto('/');
+ const card=page.locator('.ayah-card').first();await expect(card).toBeVisible({timeout:15000});
+ const arabic=card.locator(':scope > .arabic');await expect(arabic).toHaveAttribute('dir','rtl');
+ const translation=card.locator(':scope > .verse-translation');await expect(translation).toHaveAttribute('lang',/^(ms|id|en)$/);
+ const result=await card.evaluate(el=>{const a=el.querySelector(':scope > .arabic'),t=el.querySelector(':scope > .verse-translation');if(!a||!t)return null;const ar=a.getBoundingClientRect(),tr=t.getBoundingClientRect(),cr=el.getBoundingClientRect();return {arabicBottom:ar.bottom,translationTop:tr.top,cardWidth:cr.width,viewport:innerWidth,rtl:getComputedStyle(a).direction,translationDirection:getComputedStyle(t).direction}});
+ expect(result).not.toBeNull();expect(result.rtl).toBe('rtl');expect(result.translationDirection).toBe('ltr');
+ expect(result.translationTop).toBeGreaterThanOrEqual(result.arabicBottom-1);expect(result.cardWidth).toBeLessThanOrEqual(result.viewport+1);
+ await mkdir('screenshots',{recursive:true});await card.screenshot({path:'screenshots/ayah-pair-'+size.name+'.png'});
+});}
