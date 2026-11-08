@@ -8,3 +8,35 @@
 .study-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}.study-topic{border:1px solid #aabdb4;border-radius:10px;padding:1rem}.study-topic h3{margin-top:0}.study-topic a{color:#137e65}[data-theme=dark] .study-topic a{color:#8bdec5}
 
 .hijri-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;margin:1rem 0}.hijri-months button[aria-pressed=true]{background:#116b58;color:#fff}.hijri-date{font-size:1.15rem;font-weight:700}.study-topic button{max-width:100%}
+
+/* Responsive reading surface: no fixed device resolution assumptions. */
+html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
+.quran-shell{width:100%;min-width:0;overflow-x:clip}
+.quran-top{padding-inline:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));min-height:64px}
+.quran-top>div{min-width:0}.quran-top strong{display:block;overflow-wrap:anywhere}
+.reader-tabs{justify-content:flex-start;scrollbar-width:thin;scroll-snap-type:x proximity;overscroll-behavior-inline:contain;max-width:100%;padding-inline:max(4px,env(safe-area-inset-left))}
+.reader-tabs button{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap;min-height:48px}
+.quran-body{width:100%;max-width:1100px;min-width:0;padding:clamp(.5rem,2vw,1.5rem)}
+.reader-toolbar{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(.5rem,2vw,1rem)}
+.reader-toolbar>*{min-width:0}.reader-toolbar input,.reader-toolbar select{max-width:100%}
+.study-panel,.ayah-card,.study-topic,.history-reader{min-width:0;overflow-wrap:break-word}
+.study-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.history-chapter-list,.history-actions,.surah-navigation{display:flex;flex-wrap:wrap;gap:.5rem}
+.history-chapter-list button[aria-pressed=true]{background:#116b58;color:white}
+.history-reader{border:1px solid #b8ccc2;border-radius:14px;padding:clamp(.8rem,2vw,1.5rem)}
+.history-reader a{display:inline-block;margin:.25rem}
+.reading-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin:0 0 1rem;padding:.8rem;border:1px solid #b8ccc2;border-radius:12px;background:var(--paper,#fff)}
+.reading-controls label{display:flex;align-items:center;gap:.4rem;min-width:0}
+.reading-controls input[type=checkbox]{width:auto}
+.reading-guide{display:block;margin:0 0 1rem;padding:1rem;border-left:4px solid #147a63;border-radius:8px;background:#e8f5ed;color:#164837}
+.reading-guide p{margin:.35rem 0 0;line-height:1.65}
+[data-theme=dark] .reading-guide{background:#173b32;color:#d5f3e5}
+.ayah-card{padding:clamp(.85rem,3vw,1.6rem);box-shadow:0 2px 9px #142e2310}
+.ayah-card .arabic{font-size:clamp(1.45rem,5vw,2.35rem);line-height:2.6;word-break:normal;unicode-bidi:plaintext}
+.reading-flow{gap:.25rem}.reading-flow .ayah-card{border-radius:3px;box-shadow:none;margin:0}
+.ayah-actions button{min-height:44px}
+.tajweed-madd{color:#067aa5}.tajweed-ikhfa{color:#8541ad}.tajweed-qalqala{color:#b83242}
+@media(max-width:720px){.reader-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.reader-toolbar label:first-child{grid-column:1/-1}.quran-top{padding-block:.65rem}.study-panel{padding:.85rem}}
+@media(max-width:440px){.reader-toolbar{grid-template-columns:1fr}.reader-toolbar label:first-child{grid-column:auto}.reader-tabs button{min-width:0;padding:.7rem .8rem}.ayah-actions{gap:.3rem}.ayah-actions span{flex-basis:100%}.surah-navigation{width:100%}.surah-navigation button{flex:1 1 120px}.hijri-months{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(orientation:landscape) and (max-height:500px){.reader-tabs{position:static}.quran-top{min-height:48px;padding-block:.35rem}.ayah-card .arabic{line-height:2.1}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
