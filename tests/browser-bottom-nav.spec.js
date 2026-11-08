@@ -116,3 +116,18 @@ for(const size of sizes){test(size.name+' last verse remains reachable above fix
  for(const b of metrics.buttons){expect(b.width).toBeGreaterThanOrEqual(44);expect(b.height).toBeGreaterThanOrEqual(44)}
  await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/last-ayah-safe-'+size.name+'.png'});
 });}
+
+
+test('audio playback highlights only the active ayah and clears on pause',async({page})=>{
+ await installLayoutQuranMocks(page);
+ await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')});
+ await page.goto('/');
+ const first=page.locator('.ayah-card').first();await expect(first).toBeVisible();
+ await first.getByRole('button',{name:'Dengar ayat 1'}).click();
+ const audio=first.locator('audio');await expect(audio).toHaveCount(1);
+ await audio.dispatchEvent('play');await expect(first).toHaveClass(/ayah-audio-playing/);
+ await expect(page.locator('.ayah-card.ayah-audio-playing')).toHaveCount(1);
+ await audio.dispatchEvent('pause');await expect(first).not.toHaveClass(/ayah-audio-playing/);
+ const motion=await first.evaluate(el=>getComputedStyle(el).animationName);
+ expect(typeof motion).toBe('string');
+});
