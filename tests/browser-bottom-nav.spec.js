@@ -1,8 +1,16 @@
+import{installLayoutQuranMocks}from './quran-layout-fixture.mjs';
 import{attachQuranNetworkDiagnostics}from './quran-playwright-network.mjs';
 import{test,expect}from '@playwright/test';
 import{mkdir,writeFile}from 'node:fs/promises';
 import{observeQuranRequests}from '../src/quran-playwright-observer.js';
 const sizes=[{name:'portrait',width:393,height:852},{name:'landscape',width:852,height:393}];
+test.beforeEach(async({page},testInfo)=>{
+ if(/^(portrait|landscape) /.test(testInfo.title)){
+  await installLayoutQuranMocks(page);
+  await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')});
+ }
+});
+
 for(const size of sizes){test(size.name+' bottom dock screenshot and accessibility',async({page})=>{
  await page.setViewportSize(size);await page.goto('/');const nav=page.getByRole('navigation',{name:'Bottom navigation'});await expect(nav).toBeVisible();const buttons=nav.getByRole('button');await expect(buttons).toHaveCount(11);
  await expect(page.getByRole('button',{name:'Baca',exact:true}).first()).toBeVisible();
@@ -45,6 +53,8 @@ for(const size of sizes){test(size.name+' compact reader toolbar and advanced di
 for(const size of sizes){test(size.name+' ayah Arabic translation visual isolation',async({page})=>{
  await page.setViewportSize(size);await page.goto('/');
  const card=page.locator('.ayah-card').first();await expect(card).toBeVisible({timeout:15000});
+ await expect(card.locator(':scope > .arabic')).toContainText('LAYOUT_FIXTURE_1');
+ await expect(card.locator(':scope > .verse-translation')).toContainText('MALAY_FIXTURE_1');
  const arabic=card.locator(':scope > .arabic');await expect(arabic).toHaveAttribute('dir','rtl');
  const translation=card.locator(':scope > .verse-translation');await expect(translation).toHaveAttribute('lang',/^(ms|id|en)$/);
  const result=await card.evaluate(el=>{const a=el.querySelector(':scope > .arabic'),t=el.querySelector(':scope > .verse-translation');if(!a||!t)return null;const ar=a.getBoundingClientRect(),tr=t.getBoundingClientRect(),cr=el.getBoundingClientRect();return {arabicBottom:ar.bottom,translationTop:tr.top,cardWidth:cr.width,viewport:innerWidth,rtl:getComputedStyle(a).direction,translationDirection:getComputedStyle(t).direction}});
@@ -96,6 +106,8 @@ test('Arabic quran-uthmani network failure has safe endpoint evidence',async({pa
 for(const size of sizes){test(size.name+' last verse remains reachable above fixed bottom dock',async({page})=>{
  await page.setViewportSize(size);await page.goto('/');
  const cards=page.locator('.ayah-card');await expect(cards.first()).toBeVisible({timeout:15000});
+ await expect(cards).toHaveCount(7);
+ await expect(cards.last().locator(':scope > .verse-translation')).toContainText('MALAY_FIXTURE_7');
  const last=cards.last();await last.scrollIntoViewIfNeeded();
  await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
  await expect.poll(async()=>last.evaluate(el=>{const card=el.getBoundingClientRect(),nav=document.querySelector('.bottom-reader-tabs'),dock=nav?.getBoundingClientRect(),visible=nav&&!nav.classList.contains('nav-hidden');return {cardBottom:Math.round(card.bottom),dockTop:Math.round(visible?dock.top:innerHeight),viewport:innerHeight,scrollEnd:Math.abs(window.scrollY+innerHeight-document.documentElement.scrollHeight)<=2}})).toMatchObject({scrollEnd:true});
