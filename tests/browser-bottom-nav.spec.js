@@ -36,7 +36,7 @@ for(const size of sizes){test(size.name+' compact reader toolbar and advanced di
  const dimensions=await toolbar.evaluate(el=>({width:el.getBoundingClientRect().width,viewport:window.innerWidth,scrollWidth:document.documentElement.scrollWidth}));
  expect(dimensions.width).toBeLessThanOrEqual(dimensions.viewport+1);
  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.viewport+1);
- await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-'+size.name+'.png',fullPage:true});
+ await expect(page.locator('.ayah-card').first()).toBeVisible({timeout:15000});await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-'+size.name+'.png',fullPage:true});
  await disclosure.locator('summary').focus();await page.keyboard.press('Enter');await expect(disclosure).not.toHaveAttribute('open','');
 });}
 
