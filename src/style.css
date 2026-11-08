@@ -69,3 +69,27 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .verse-share-preview{flex-basis:100%;padding:1rem;border:1px solid #adc4b9;border-radius:12px;background:var(--paper,#fff);min-width:0}
 .verse-share-preview .arabic{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:1.7rem;line-height:2.4;text-align:right;overflow-wrap:anywhere}
 .verse-share-preview a{min-height:44px}
+
+/* Compact mobile Mushaf: preserve accessible 44px touch targets while reducing visual bulk. */
+.ayah-card{padding:clamp(.55rem,1.5vw,.9rem)}
+.ayah-list{gap:.55rem}
+.ayah-actions{gap:.25rem}
+.ayah-actions button{min-height:44px;padding:.3rem .5rem;font-size:.86rem;border-radius:7px}
+.ayah-actions span{font-size:.87rem;font-weight:600}
+.ayah-share{gap:.3rem;padding:.45rem;margin:.3rem 0 .5rem}
+.ayah-share button,.ayah-share a{min-height:44px;padding:.3rem .55rem;font-size:.84rem}
+.verse-share-preview{padding:.55rem}
+.verse-share-preview .arabic{font-size:1.45rem;line-height:1.85;margin:.3rem 0}
+.verse-share-preview p{margin:.3rem 0}
+.ayah-card .arabic{line-height:2.05;margin:.5rem 0}
+.verse-translation{border-top:1px solid #d5e1d9;padding-top:.35rem;line-height:1.65}
+.verse-translation p{margin:.25rem 0}
+.verse-translation small{display:block;font-size:.72rem;color:#65756b}
+.focus-reading{max-width:760px;margin-inline:auto}
+.focus-reading .ayah-card{border:2px solid #14816a;padding:clamp(.8rem,3vw,1.4rem)}
+.focus-reading .ayah-card .arabic{line-height:2.45}
+.arabic-word{font-family:inherit;font-size:inherit;line-height:inherit;min-height:44px;padding:.05em .12em;margin:.04em;border:1px solid transparent;background:transparent;color:inherit;border-radius:.2em;vertical-align:baseline}
+.arabic-word.word-active{background:#dff3e9;border-color:#137f64;color:#123c31}
+.arabic-word:focus-visible{outline:3px solid #147f66;outline-offset:2px}
+[data-theme=dark] .arabic-word.word-active{background:#215b4c;color:#fff}
+@media(max-width:440px){.ayah-actions span{flex-basis:auto;margin-right:auto}.ayah-actions button{padding:.3rem .4rem}.ayah-share button,.ayah-share a{flex:1 1 92px}.reading-controls{gap:.35rem;padding:.5rem}.reading-controls>label,.reading-controls>button{flex:1 1 125px}}
