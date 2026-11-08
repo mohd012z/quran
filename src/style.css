@@ -167,3 +167,11 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .ayah-card:focus-within{scroll-margin-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 @media(max-width:480px){.ayah-card{padding:.8rem}.ayah-actions{gap:.25rem}.ayah-actions>button{font-size:.83rem;padding:.35rem .45rem}.ayah-card>.arabic{margin:.7rem 0 .55rem;padding:.55rem 0 .75rem;line-height:2.15}}
 @media(prefers-reduced-motion:reduce){.ayah-card{scroll-behavior:auto}}
+
+
+/* Listening feedback is verse-level only: no fabricated word timing or Tajweed rules. */
+.ayah-card.ayah-audio-playing{border-color:#148b70;box-shadow:0 0 0 2px rgba(20,139,112,.24);animation:ayah-listening-pulse 2.4s ease-in-out infinite}
+.ayah-card.ayah-audio-playing>.arabic{background:rgba(20,139,112,.10);border-radius:10px;transition:background-color .2s}
+.basmala-display{display:block;text-align:center;padding:.25em .35em;margin-bottom:.45em;border-bottom:1px solid #b5d4c8;color:inherit}
+@keyframes ayah-listening-pulse{0%,100%{box-shadow:0 0 0 2px rgba(20,139,112,.15)}50%{box-shadow:0 0 0 5px rgba(20,139,112,.34)}}
+@media(prefers-reduced-motion:reduce){.ayah-card.ayah-audio-playing{animation:none}}
