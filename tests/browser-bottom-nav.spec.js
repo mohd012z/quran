@@ -131,3 +131,43 @@ test('audio playback highlights only the active ayah and clears on pause',async(
  const motion=await first.evaluate(el=>getComputedStyle(el).animationName);
  expect(typeof motion).toBe('string');
 });
+
+test('Khat themes and translation follow active audio without changing Arabic source',async({page})=>{
+ await installLayoutQuranMocks(page);
+ await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')});
+ await page.goto('/');
+ const first=page.locator('.ayah-card').first();
+ await expect(first).toBeVisible();
+ const original=await first.locator('p.arabic').textContent();
+ const controls=page.getByRole('group',{name:'Pilihan bacaan Khat dan audio'});
+ await expect(controls).toBeVisible();
+ await expect(page.locator('.ayah-list')).toHaveClass(/khat-mushaf/);
+ await controls.getByRole('combobox',{name:'Gaya Khat'}).selectOption('modern');
+ await expect(page.locator('.ayah-list')).toHaveClass(/khat-modern/);
+ expect(await first.locator('p.arabic').textContent()).toBe(original);
+ await first.getByRole('button',{name:'Dengar ayat 1'}).click();
+ const audio=first.locator('audio');
+ await expect(audio).toHaveCount(1);
+ await audio.dispatchEvent('play');
+ await expect(first.locator('.verse-translation')).toHaveClass(/translation-audio-active/);
+ await controls.getByRole('checkbox',{name:'Serlah terjemahan'}).uncheck();
+ await expect(first.locator('.verse-translation')).not.toHaveClass(/translation-audio-active/);
+ await controls.getByRole('checkbox',{name:'Serlah terjemahan'}).check();
+ await audio.dispatchEvent('pause');
+ await expect(first.locator('.verse-translation')).not.toHaveClass(/translation-audio-active/);
+ expect(await first.locator('p.arabic').textContent()).toBe(original);
+});
+test('ayah follow option can be disabled while audio highlight remains',async({page})=>{
+ await installLayoutQuranMocks(page);
+ await page.goto('/');
+ const controls=page.getByRole('group',{name:'Pilihan bacaan Khat dan audio'});
+ await controls.getByRole('checkbox',{name:'Ikut ayat audio'}).uncheck();
+ const first=page.locator('.ayah-card').first();
+ await first.getByRole('button',{name:'Dengar ayat 1'}).click();
+ const audio=first.locator('audio');
+ await audio.dispatchEvent('play');
+ await expect(first).toHaveClass(/ayah-audio-playing/);
+ await expect(controls.getByRole('checkbox',{name:'Ikut ayat audio'})).not.toBeChecked();
+ await audio.dispatchEvent('pause');
+ await expect(first).not.toHaveClass(/ayah-audio-playing/);
+});
