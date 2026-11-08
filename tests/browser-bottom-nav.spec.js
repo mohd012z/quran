@@ -201,3 +201,36 @@ test('Kareem sidebar, dark mode and shared audio dock work with synthetic fixtur
  await audio.dispatchEvent('pause');
  await expect(dock.getByRole('button',{name:'Main audio'})).toBeVisible();
 });
+
+for(const size of [{name:'portrait',width:390,height:844},{name:'landscape',width:844,height:390}]){
+ test('Kareem audio dock remains in viewport during synthetic playback: '+size.name,async({page})=>{
+  await page.setViewportSize({width:size.width,height:size.height});
+  await installLayoutQuranMocks(page);
+  await page.goto('/');
+  const first=page.locator('.ayah-card').first();
+  await expect(first).toBeVisible();
+  await first.getByRole('button',{name:'Dengar ayat 1'}).click();
+  const audio=first.locator('audio');
+  await expect(audio).toHaveCount(1);
+  await audio.dispatchEvent('play');
+  const dock=page.getByLabel('Pemain audio ayat');
+  await expect(dock).toBeVisible();
+  await expect(dock.getByRole('button',{name:'Jeda audio'})).toBeVisible();
+  const metrics=await dock.evaluate(el=>{
+   const rect=el.getBoundingClientRect();
+   const nav=document.querySelector('.bottom-reader-tabs');
+   const nr=nav?.getBoundingClientRect();
+   return {top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right,
+    viewportWidth:innerWidth,viewportHeight:innerHeight,
+    navTop:nav&&!nav.classList.contains('nav-hidden')?nr.top:innerHeight};
+  });
+  expect(metrics.top).toBeGreaterThanOrEqual(-1);
+  expect(metrics.left).toBeGreaterThanOrEqual(-1);
+  expect(metrics.right).toBeLessThanOrEqual(metrics.viewportWidth+1);
+  expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight+1);
+  expect(metrics.bottom).toBeLessThanOrEqual(metrics.navTop+1);
+  await mkdir('screenshots',{recursive:true});
+  await page.screenshot({path:'screenshots/kareem-audio-dock-'+size.name+'.png'});
+  await audio.dispatchEvent('pause');
+ });
+}
