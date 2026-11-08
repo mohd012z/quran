@@ -1,0 +1,1 @@
+export const DEFAULT_SETTINGS_UI=Object.freeze({keepAwake:false});export function normalizeSettingsUi(input){const s=input&&typeof input==='object'&&!Array.isArray(input)?input:{};return {keepAwake:s.keepAwake===true}};
