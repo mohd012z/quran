@@ -9,8 +9,8 @@ export function auditCorpus(primary,reference,{translation}={}){
  let checked=0,global=0;
  for(let s=1;s<=114;s++){
   const a=primary[s-1],b=reference[s-1],expected=EXPECTED_COUNTS[s-1];
-  if(a?.number!==s||b?.number!==s){fail('SURAH_ID',s,null);continue}
-  if(!Array.isArray(a.ayahs)||!Array.isArray(b.ayahs)||a.ayahs.length!==expected||b.ayahs.length!==expected){fail('AYAH_COUNT',s,null);continue}
+  if(a?.number!==s||b?.number!==s){fail('SURAH_ID',s,null);global+=expected;continue}
+  if(!Array.isArray(a.ayahs)||!Array.isArray(b.ayahs)||a.ayahs.length!==expected||b.ayahs.length!==expected){fail('AYAH_COUNT',s,null);global+=expected;continue}
   for(let i=0;i<expected;i++){
    global++;const x=a.ayahs[i],y=b.ayahs[i],n=i+1;
    if(x?.numberInSurah!==n||y?.numberInSurah!==n||!validId(x?.number)||!validId(y?.number)||x.number!==y.number||x.number!==global){fail('VERSE_ID',s,n);continue}
@@ -23,4 +23,22 @@ export function auditCorpus(primary,reference,{translation}={}){
  }
  if(global!==6236)fail('GLOBAL_TOTAL',null,null);
  return {passed:issues.length===0&&checked===6236,checked,issues};
+}
+
+/** Structural provenance checks; supplied metadata is not proof of editorial authenticity. */
+export function auditSourceManifest(manifest){
+ const issues=[];const add=(code,source)=>issues.push({code,source});
+ if(!manifest||!Array.isArray(manifest.sources))return {passed:false,issues:[{code:'SOURCES_MISSING',source:null}]};
+ const ids=['arabic-primary','arabic-reference','malay-translation'];
+ for(const id of ids){
+  const entries=manifest.sources.filter(x=>x?.role===id);
+  if(entries.length!==1){add('SOURCE_ROLE',id);continue}
+  const s=entries[0];
+  if(typeof s.origin!=='string'||!/^https:\/\//.test(s.origin))add('ORIGIN',id);
+  if(typeof s.edition!=='string'||s.edition!==(id==='malay-translation'?'ms.basmeih':'quran-uthmani'))add('EDITION',id);
+  if(typeof s.sha256!=='string'||!/^[a-f0-9]{64}$/.test(s.sha256))add('HASH',id);
+  if(typeof s.license!=='string'||!s.license.trim()||s.license==='unknown')add('LICENSE_UNVERIFIED',id);
+  if(typeof s.retrievedAt!=='string'||!/^\d{4}-\d{2}-\d{2}T/.test(s.retrievedAt)||!Number.isFinite(Date.parse(s.retrievedAt)))add('RETRIEVAL_DATE',id);
+ }
+ return {passed:issues.length===0,issues};
 }
