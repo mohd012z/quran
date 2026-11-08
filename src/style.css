@@ -65,3 +65,7 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .wirid-list article{border:1px solid #ccd8d2;border-radius:12px;padding:1rem;min-width:0}
 .wirid-list .arabic{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:1.7rem;line-height:2;text-align:right}
 .study-panel audio{max-width:100%;width:100%}
+
+.verse-share-preview{flex-basis:100%;padding:1rem;border:1px solid #adc4b9;border-radius:12px;background:var(--paper,#fff);min-width:0}
+.verse-share-preview .arabic{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:1.7rem;line-height:2.4;text-align:right;overflow-wrap:anywhere}
+.verse-share-preview a{min-height:44px}
