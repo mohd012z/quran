@@ -19,3 +19,23 @@ for(const size of sizes){test(size.name+' bottom dock screenshot and accessibili
  await page.getByRole('button',{name:'Show bottom navigation'}).click();
  await expect(nav).toBeVisible();await expect(nav.locator('[aria-current="page"]')).toBeFocused();
 });}
+
+for(const size of sizes){test(size.name+' compact reader toolbar and advanced disclosure',async({page})=>{
+ await page.setViewportSize(size);await page.goto('/');
+ const toolbar=page.locator('.reader-toolbar');await expect(toolbar).toBeVisible();
+ await expect(toolbar.getByRole('combobox',{name:'Pilih Surah'})).toBeVisible();
+ await expect(toolbar.getByRole('textbox',{name:'Cari ayat'})).toBeVisible();
+ await expect(toolbar.getByRole('combobox',{name:'Penapis bacaan'})).toBeVisible();
+ const disclosure=page.locator('details.reader-more-controls');await expect(disclosure).toBeVisible();
+ await expect(disclosure).not.toHaveAttribute('open','');
+ await disclosure.locator('summary').focus();await page.keyboard.press('Enter');
+ await expect(disclosure).toHaveAttribute('open','');
+ await expect(disclosure.getByRole('combobox',{name:'Bilangan ulang ayat'})).toBeVisible();
+ await expect(disclosure.getByRole('combobox',{name:'Mod bacaan perkataan'})).toBeVisible();
+ await expect(disclosure.getByRole('button',{name:/Sambung bacaan/})).toBeVisible();
+ const dimensions=await toolbar.evaluate(el=>({width:el.getBoundingClientRect().width,viewport:window.innerWidth,scrollWidth:document.documentElement.scrollWidth}));
+ expect(dimensions.width).toBeLessThanOrEqual(dimensions.viewport+1);
+ expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.viewport+1);
+ await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-'+size.name+'.png',fullPage:true});
+ await disclosure.locator('summary').focus();await page.keyboard.press('Enter');await expect(disclosure).not.toHaveAttribute('open','');
+});}
