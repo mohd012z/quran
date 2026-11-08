@@ -57,3 +57,11 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .ayah-share a:focus-visible,.ayah-share button:focus-visible{outline:3px solid #168a72;outline-offset:2px}
 .ayah-share small,.ayah-share [role=status]{flex-basis:100%;line-height:1.5}
 @media(max-width:440px){.ayah-share button,.ayah-share a{flex:1 1 125px}}
+
+.prayer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.8rem}
+.prayer-grid label{display:grid;gap:.4rem;min-width:0}
+.prayer-grid input{width:100%;min-width:0;min-height:44px}
+.wirid-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:.75rem}
+.wirid-list article{border:1px solid #ccd8d2;border-radius:12px;padding:1rem;min-width:0}
+.wirid-list .arabic{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:1.7rem;line-height:2;text-align:right}
+.study-panel audio{max-width:100%;width:100%}
