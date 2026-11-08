@@ -156,3 +156,14 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .reader-more-controls>summary:focus-visible{outline:3px solid #168e80;outline-offset:-3px}
 .reader-more-controls>.reading-controls{padding:.6rem;border-top:1px solid #cbd8d1}
 @media(max-width:640px){.reader-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.4rem;margin:.45rem 0}.reader-toolbar label{font-size:.78rem;min-width:0}.reader-toolbar label:nth-child(2){grid-column:1/-1;grid-row:2}.reader-toolbar select,.reader-toolbar input{min-height:44px;padding:.4rem;font-size:.9rem}.reader-sections{padding:.25rem;gap:.25rem}.reader-sections button{min-height:44px}.surah-compact-list{padding:.15rem;gap:.25rem}.surah-compact-list button{min-width:100px;min-height:44px;padding:.25rem .4rem}.surah-compact-list small{font-size:.7rem}}
+
+/* Ayah-by-ayah reading layout: visual reference study, not a reproduction. */
+.ayah-card{min-width:0;overflow:hidden;contain:layout;}
+.ayah-card>.arabic{display:block;margin:1rem 0 .85rem;padding:.7rem .15rem 1rem;border-bottom:1px solid #d9e2dc;direction:rtl;unicode-bidi:plaintext;text-align:right;line-height:2.25;white-space:normal;overflow-wrap:break-word}
+.ayah-card>.verse-translation{display:block;direction:ltr;unicode-bidi:plaintext;text-align:start;line-height:1.8;overflow-wrap:anywhere;margin:.5rem 0}
+.ayah-actions{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
+.ayah-actions>span:first-child{font-weight:700;margin-right:auto;white-space:nowrap}
+.ayah-actions>button{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;padding:.4rem .55rem}
+.ayah-card:focus-within{scroll-margin-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+@media(max-width:480px){.ayah-card{padding:.8rem}.ayah-actions{gap:.25rem}.ayah-actions>button{font-size:.83rem;padding:.35rem .45rem}.ayah-card>.arabic{margin:.7rem 0 .55rem;padding:.55rem 0 .75rem;line-height:2.15}}
+@media(prefers-reduced-motion:reduce){.ayah-card{scroll-behavior:auto}}
