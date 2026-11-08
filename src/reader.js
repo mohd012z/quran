@@ -1,4 +1,4 @@
-export const DEFAULT_READER_SETTINGS=Object.freeze({translation:true,tajweed:false,size:30,theme:'light',qari:'ar.alafasy'});
+export const DEFAULT_READER_SETTINGS=Object.freeze({translation:true,translationLanguage:'ms',tajweed:false,size:30,theme:'light',qari:'ar.alafasy'});
 export const TAJWEED_RULES=Object.freeze([
  {id:'madd',name:'Mad',description:'Panjang bacaan'},
  {id:'ikhfa',name:'Ikhfa',description:'Bunyi samar'},
@@ -9,6 +9,7 @@ export function sanitizeReaderSettings(input){
  const s=input&&typeof input==='object'&&!Array.isArray(input)?input:{};
  return {
  translation:typeof s.translation==='boolean'?s.translation:true,
+ translationLanguage:['ms','id','en'].includes(s.translationLanguage)?s.translationLanguage:'ms',
  tajweed:typeof s.tajweed==='boolean'?s.tajweed:false,
  size:Number.isInteger(s.size)?Math.min(52,Math.max(22,s.size)):30,
  theme:['light','dark','sepia'].includes(s.theme)?s.theme:'light',
