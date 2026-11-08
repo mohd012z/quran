@@ -1,6 +1,16 @@
 name: Quran Android APK research
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/android-apk.yml'
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'index.html'
   push:
     branches:
       - research/quran-tajweed-foundation-20261108
@@ -53,7 +63,9 @@ jobs:
           APK=android/app/build/outputs/apk/debug/app-debug.apk
           test -s "$APK"
           sha256sum "$APK" | tee apk-sha256.txt
-          "${ANDROID_HOME}/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          APKSIGNER="$(find "${ANDROID_HOME}/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
       - uses: actions/upload-artifact@v4
         with:
           name: quran-research-debug-apk
