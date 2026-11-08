@@ -51,3 +51,9 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .reading-controls button,.reading-controls select{min-height:44px}
 .reading-controls>label{flex:0 1 auto}
 @media(max-width:440px){.reading-controls>label,.reading-controls>button{flex:1 1 100%}.reading-controls select{width:100%}}
+
+.ayah-share{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.5rem 0 1rem;padding:.75rem;border:1px solid #b8ccc2;border-radius:12px;background:var(--paper,#fff)}
+.ayah-share button,.ayah-share a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.5rem .85rem;border:1px solid #8ba99c;border-radius:9px;text-decoration:none;color:inherit;background:transparent;font:inherit}
+.ayah-share a:focus-visible,.ayah-share button:focus-visible{outline:3px solid #168a72;outline-offset:2px}
+.ayah-share small,.ayah-share [role=status]{flex-basis:100%;line-height:1.5}
+@media(max-width:440px){.ayah-share button,.ayah-share a{flex:1 1 125px}}
