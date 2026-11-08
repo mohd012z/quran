@@ -11,7 +11,7 @@ export function sanitizeReaderSettings(input){
  translation:typeof s.translation==='boolean'?s.translation:true,
  tajweed:typeof s.tajweed==='boolean'?s.tajweed:false,
  size:Number.isInteger(s.size)?Math.min(52,Math.max(22,s.size)):30,
- theme:['light','dark'].includes(s.theme)?s.theme:'light',
+ theme:['light','dark','sepia'].includes(s.theme)?s.theme:'light',
  qari:['ar.alafasy','ar.husary','ar.minshawi'].includes(s.qari)?s.qari:'ar.alafasy'
  };
 }
