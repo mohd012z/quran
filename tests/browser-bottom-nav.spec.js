@@ -77,7 +77,7 @@ test('redacted browser network evidence with deterministic Arabic and Basmeih mo
 
 test('Al-Baqarah 2:1/2:2 mocked API diagnostic records are redacted',async({page})=>{
  const records=[];const detach=attachQuranNetworkDiagnostics(page,records);
- await page.route('https://api.alquran.cloud/v1/surah/2/ms.basmeih',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({status:'ERROR',data:null})}));
+ await page.route('https://api.alquran.cloud/v1/surah/2/ms.basmeih',route=>route.fulfill({status:503,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify({status:'ERROR',data:null})}));
  const response=await page.evaluate(async()=>{try{const r=await fetch('https://api.alquran.cloud/v1/surah/2/ms.basmeih');return r.status}catch{return -1}});
  expect(response).toBe(503);
  expect(records).toContainEqual({endpoint:'malay-2',event:'response',status:503,kind:'HTTP'});
