@@ -40,3 +40,14 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 @media(max-width:440px){.reader-toolbar{grid-template-columns:1fr}.reader-toolbar label:first-child{grid-column:auto}.reader-tabs button{min-width:0;padding:.7rem .8rem}.ayah-actions{gap:.3rem}.ayah-actions span{flex-basis:100%}.surah-navigation{width:100%}.surah-navigation button{flex:1 1 120px}.hijri-months{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(orientation:landscape) and (max-height:500px){.reader-tabs{position:static}.quran-top{min-height:48px;padding-block:.35rem}.ayah-card .arabic{line-height:2.1}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Mushaf presentation themes */
+[data-theme=sepia]{color-scheme:light;background:#f4ead4;color:#453b2b;--paper:#fff8e8}
+[data-theme=sepia] .reader-tabs,[data-theme=sepia] .reading-controls{background:#fff8e8;border-color:#d9c7a5}
+[data-theme=sepia] .ayah-card,[data-theme=sepia] .study-panel{border-color:#d5c2a0}
+[data-theme=sepia] .reading-guide{background:#f1e1bd;color:#493b25}
+[data-theme=sepia] .source-note{color:#655944}
+.ayah-card.current-ayah{border-inline-start:4px solid #15906c}
+.reading-controls button,.reading-controls select{min-height:44px}
+.reading-controls>label{flex:0 1 auto}
+@media(max-width:440px){.reading-controls>label,.reading-controls>button{flex:1 1 100%}.reading-controls select{width:100%}}
