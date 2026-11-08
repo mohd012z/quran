@@ -81,12 +81,12 @@ jobs:
             if bash ./gradlew --no-daemon assembleDebug 2>&1 | tee gradle-attempt.log; then
               exit 0
             fi
-            if ! grep -Eqi 'Downloading .*gradle-8\.2\.1-all\.zip failed: timeout|SocketTimeoutException|Read timed out|Server returned HTTP response code: (429|500|502|503|504) for URL: https://github\.com/gradle/gradle-distributions/releases/download/v8\.2\.1/gradle-8\.2\.1-all\.zip' gradle-attempt.log; then
+            if ! grep -Eqi 'Downloading .*gradle-8\.2\.1-all\.zip failed: timeout|SocketTimeoutException|Read timed out|Received status code (429|500|502|503|504) from server|Server returned HTTP response code: (429|500|502|503|504) for URL: https://github\.com/gradle/gradle-distributions/releases/download/v8\.2\.1/gradle-8\.2\.1-all\.zip' gradle-attempt.log; then
               echo "Non-network Gradle failure: no retry"
               exit 1
             fi
             if [ "$attempt" -eq 3 ]; then
-              echo "Gradle download still failing after 3 bounded attempts"
+              echo "Transient Gradle dependency download still failing after 3 bounded attempts"
               exit 1
             fi
             sleep "$((attempt * 5))"
