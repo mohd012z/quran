@@ -177,10 +177,12 @@ test('Kareem sidebar, dark mode and shared audio dock work with synthetic fixtur
  await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')});
  await page.goto('/');
  await expect(page.getByRole('button',{name:'Buka senarai Surah'})).toBeVisible();
+ await page.setViewportSize({width:390,height:844});
  await page.getByRole('button',{name:'Buka senarai Surah'}).click();
  await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).toHaveClass(/is-open/);
  await page.getByRole('button',{name:'Tutup senarai Surah'}).click();
  await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).not.toHaveClass(/is-open/);
+ await page.setViewportSize({width:1280,height:800});
  await page.getByRole('button',{name:'Tukar tema gelap'}).click();
  await expect(page.locator('.quran-shell')).toHaveClass(/kareem-dark/);
  await page.getByRole('button',{name:'Tukar tema gelap'}).click();
