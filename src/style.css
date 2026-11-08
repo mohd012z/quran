@@ -149,3 +149,10 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .bottom-reader-tabs button:focus-visible,.bottom-nav-reveal:focus-visible{outline:3px solid #e4a72c;outline-offset:-3px}
 @media(orientation:landscape) and (max-height:540px){.bottom-reader-tabs{padding-block:3px calc(3px + env(safe-area-inset-bottom,0px))}.bottom-reader-tabs button{min-height:48px;flex-basis:78px}.bottom-nav-icon{font-size:1rem}.bottom-nav-label{font-size:.68rem}.quran-shell{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}}
 @media(max-width:390px) and (orientation:portrait){.bottom-reader-tabs button{flex-basis:68px;min-width:68px}.bottom-nav-label{font-size:.67rem}}
+
+/* Mobile-first reading toolbar: secondary controls stay available on demand. */
+.reader-more-controls{margin:.45rem 0 .75rem;border:1px solid #cbd8d1;border-radius:10px;background:var(--paper,#fff);overflow:hidden}
+.reader-more-controls>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;padding:.55rem .8rem;font-weight:600;list-style-position:inside}
+.reader-more-controls>summary:focus-visible{outline:3px solid #168e80;outline-offset:-3px}
+.reader-more-controls>.reading-controls{padding:.6rem;border-top:1px solid #cbd8d1}
+@media(max-width:640px){.reader-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.4rem;margin:.45rem 0}.reader-toolbar label{font-size:.78rem;min-width:0}.reader-toolbar label:nth-child(2){grid-column:1/-1;grid-row:2}.reader-toolbar select,.reader-toolbar input{min-height:44px;padding:.4rem;font-size:.9rem}.reader-sections{padding:.25rem;gap:.25rem}.reader-sections button{min-height:44px}.surah-compact-list{padding:.15rem;gap:.25rem}.surah-compact-list button{min-width:100px;min-height:44px;padding:.25rem .4rem}.surah-compact-list small{font-size:.7rem}}
