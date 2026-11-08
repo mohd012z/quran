@@ -130,3 +130,13 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 .juz-compact-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:.4rem;padding:.5rem}
 .juz-compact-list button{min-height:44px}
 @media(max-width:390px){.reader-sections{gap:.15rem}.reader-sections button{padding:.35rem}.surah-compact-list button{min-width:105px}}
+
+/* Bottom dock: all destinations remain reachable by horizontal scrolling. */
+.quran-shell{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+.bottom-reader-tabs{position:fixed;inset:auto 0 0 0;top:auto;z-index:30;justify-content:flex-start;gap:4px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:8px max(12px,env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid #b8cec3;border-bottom:0;box-shadow:0 -3px 16px #0002;transition:transform .22s ease,visibility .22s ease}
+.bottom-reader-tabs button{flex:0 0 auto;min-width:82px;min-height:48px;border-radius:12px;padding:10px 12px;white-space:nowrap}
+.bottom-reader-tabs button[aria-current=page]{border-bottom:0;background:#087d5c;color:#fff}
+.bottom-reader-tabs.nav-hidden{transform:translateY(110%);visibility:hidden;pointer-events:none}
+.bottom-nav-reveal{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));right:calc(12px + env(safe-area-inset-right,0px));z-index:31;background:#087d5c;color:#fff;border:2px solid #fff;border-radius:24px;min-height:48px;padding:8px 16px;box-shadow:0 3px 12px #0004}
+.bottom-nav-reveal.is-hidden{display:none}
+@media(prefers-reduced-motion:reduce){.bottom-reader-tabs{transition:none}}
