@@ -61,9 +61,36 @@ jobs:
           EOF
           npx cap add android
           npx cap sync android
-      - name: Build debug APK
+      - name: Harden generated Gradle wrapper download
         working-directory: android
-        run: bash ./gradlew --no-daemon assembleDebug
+        run: |
+          set -euo pipefail
+          PROPS=gradle/wrapper/gradle-wrapper.properties
+          test -s "$PROPS"
+          grep -Fq 'gradle-8.2.1-all.zip' "$PROPS"
+          sed -i '/^networkTimeout=/d' "$PROPS"
+          printf '\nnetworkTimeout=120000\n' >> "$PROPS"
+          grep -Fxq 'networkTimeout=120000' "$PROPS"
+          grep '^distributionUrl=' "$PROPS"
+      - name: Build debug APK with bounded network retries
+        working-directory: android
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "Gradle build attempt $attempt of 3"
+            if bash ./gradlew --no-daemon assembleDebug 2>&1 | tee gradle-attempt.log; then
+              exit 0
+            fi
+            if ! grep -Eqi 'Downloading .*gradle-8\.2\.1-all\.zip failed: timeout|SocketTimeoutException|Read timed out' gradle-attempt.log; then
+              echo "Non-network Gradle failure: no retry"
+              exit 1
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Gradle download still failing after 3 bounded attempts"
+              exit 1
+            fi
+            sleep "$((attempt * 5))"
+          done
       - name: Verify APK integrity
         run: |
           APK=android/app/build/outputs/apk/debug/app-debug.apk
