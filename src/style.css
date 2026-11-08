@@ -6,3 +6,5 @@
 .voice-practice{border:1px solid #a4b9b0;border-radius:12px;padding:1rem;display:block}.voice-practice button{margin:.3rem}.voice-practice audio{max-width:100%}.pitch-bars{height:120px;display:flex;align-items:flex-end;gap:2px;overflow:hidden;border-bottom:1px solid #8ba39a;background:var(--paper,#fff)}.pitch-bar{flex:1;min-width:2px;max-width:12px;border-radius:3px 3px 0 0}.pitch-bar.pitch-low{background:#16845e}.pitch-bar.pitch-medium{background:#2976c9}.pitch-bar.pitch-high{background:#ce8c2b}
 
 .study-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}.study-topic{border:1px solid #aabdb4;border-radius:10px;padding:1rem}.study-topic h3{margin-top:0}.study-topic a{color:#137e65}[data-theme=dark] .study-topic a{color:#8bdec5}
+
+.hijri-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;margin:1rem 0}.hijri-months button[aria-pressed=true]{background:#116b58;color:#fff}.hijri-date{font-size:1.15rem;font-weight:700}.study-topic button{max-width:100%}
