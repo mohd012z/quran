@@ -171,3 +171,31 @@ test('ayah follow option can be disabled while audio highlight remains',async({p
  await audio.dispatchEvent('pause');
  await expect(first).not.toHaveClass(/ayah-audio-playing/);
 });
+
+test('Kareem sidebar, dark mode and shared audio dock work with synthetic fixtures',async({page})=>{
+ await installLayoutQuranMocks(page);
+ await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')});
+ await page.goto('/');
+ await expect(page.getByRole('button',{name:'Buka senarai Surah'})).toBeVisible();
+ await page.getByRole('button',{name:'Buka senarai Surah'}).click();
+ await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).toHaveClass(/is-open/);
+ await page.getByRole('button',{name:'Tutup senarai Surah'}).click();
+ await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).not.toHaveClass(/is-open/);
+ await page.getByRole('button',{name:'Tukar tema gelap'}).click();
+ await expect(page.locator('.quran-shell')).toHaveClass(/kareem-dark/);
+ await page.getByRole('button',{name:'Tukar tema gelap'}).click();
+ await expect(page.locator('.quran-shell')).not.toHaveClass(/kareem-dark/);
+ const first=page.locator('.ayah-card').first();
+ await first.getByRole('button',{name:'Dengar ayat 1'}).click();
+ const dock=page.getByLabel('Pemain audio ayat');
+ await expect(dock).toBeVisible();
+ await expect(dock.getByRole('combobox',{name:'Qari pemain'})).toBeVisible();
+ await expect(dock.getByRole('combobox',{name:'Kelajuan audio'})).toHaveValue('1');
+ await dock.getByRole('combobox',{name:'Kelajuan audio'}).selectOption('1.25');
+ await expect(dock.getByRole('combobox',{name:'Kelajuan audio'})).toHaveValue('1.25');
+ const audio=first.locator('audio');
+ await audio.dispatchEvent('play');
+ await expect(dock.getByRole('button',{name:'Jeda audio'})).toBeVisible();
+ await audio.dispatchEvent('pause');
+ await expect(dock.getByRole('button',{name:'Main audio'})).toBeVisible();
+});
