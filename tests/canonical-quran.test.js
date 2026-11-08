@@ -33,3 +33,52 @@ test('reject incomplete Tanzil notice before importing',()=>{
  const text='1|1|بِسْمِ';
  assert.throws(()=>buildCanonical(text,{sourceSha256:hash(text),notice:'Tanzil Project'}),/provenance/);
 });
+
+const syntheticLines=()=>AYAH_COUNTS.flatMap((n,i)=>Array.from({length:n},(_,j)=>`${i+1}|${j+1}|بِسْمِ ${i+1} ${j+1}`));
+const makeSynthetic=(eol='\n',bom='')=>bom+syntheticLines().join(eol)+eol;
+test('complete synthetic 6236-verse round trip is deterministic',()=>{
+ const source=makeSynthetic();
+ const options={sourceSha256:hash(Buffer.from(source,'utf8')),notice,sourceBytes:Buffer.from(source,'utf8')};
+ const a=buildCanonical(source,options),b=buildCanonical(source,options);
+ assert.equal(a.surahs.length,114);
+ assert.equal(a.surahs.reduce((n,s)=>n+s.ayahs.length,0),6236);
+ assert.deepEqual(a,b);
+ assert.equal(validateCanonical(a).contentSha256,a.contentSha256);
+ assert.equal(a.surahs[0].ayahs[0].text,'بِسْمِ 1 1');
+ assert.equal(a.surahs[113].ayahs[5].text,'بِسْمِ 114 6');
+});
+test('raw source checksum distinguishes LF CRLF BOM and trailing newline',()=>{
+ const lf=makeSynthetic(),crlf=makeSynthetic('\r\n'),bom=makeSynthetic('\n','\uFEFF'),withoutFinal=lf.slice(0,-1);
+ const variants=[lf,crlf,bom,withoutFinal];
+ const hashes=variants.map(v=>hash(Buffer.from(v,'utf8')));
+ assert.equal(new Set(hashes).size,4);
+ for(let i=0;i<variants.length;i++){
+  const sourceBytes=Buffer.from(variants[i],'utf8');
+  const data=buildCanonical(variants[i],{sourceSha256:hashes[i],notice,sourceBytes});
+  assert.equal(data.sourceSha256,hashes[i]);
+  assert.equal(data.surahs.length,114);
+ }
+ assert.throws(()=>buildCanonical(crlf,{sourceSha256:hashes[0],notice}),/checksum/);
+});
+test('Unicode NFC differences remain distinct without rewriting source',()=>{
+ const source=makeSynthetic();
+ const decomposed='ا\u0654';
+ const composed='\u0623';
+ const a=source.replace('بِسْمِ 1 1',`بِسْمِ ${decomposed} 1 1`);
+ const b=source.replace('بِسْمِ 1 1',`بِسْمِ ${composed} 1 1`);
+ assert.notEqual(hash(a),hash(b));
+ const aa=buildCanonical(a,{sourceSha256:hash(a),notice});
+ const bb=buildCanonical(b,{sourceSha256:hash(b),notice});
+ assert.notEqual(aa.surahs[0].ayahs[0].sha256,bb.surahs[0].ayahs[0].sha256);
+ assert.ok(aa.surahs[0].ayahs[0].text.includes(decomposed));
+ assert.ok(bb.surahs[0].ayahs[0].text.includes(composed));
+});
+test('reject altered synthetic verse and changed source bytes',()=>{
+ const source=makeSynthetic();
+ const sourceSha256=hash(source);
+ const changed=source.replace('1|1|بِسْمِ 1 1','1|1|بِسْمِ 1 2');
+ assert.throws(()=>buildCanonical(changed,{sourceSha256,notice}),/checksum/);
+ const valid=buildCanonical(source,{sourceSha256,notice});
+ valid.surahs[0].ayahs[0].text+='!';
+ assert.throws(()=>validateCanonical(valid),/Verse SHA-256 mismatch/);
+});
