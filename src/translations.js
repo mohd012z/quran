@@ -11,7 +11,7 @@ export function selectTranslationEdition(editions,language){
 export function validateTranslationSurah(payload,surah,edition,arabicVerses){
  const data=payload?.data;if(data?.number!==surah||data?.edition?.identifier!==edition.identifier||data.edition.type!=='translation'||!Array.isArray(data.ayahs)||data.ayahs.length!==arabicVerses.length)throw Error('Translation metadata or verse count mismatch');
  const out=new Map();
- for(let i=0;i<data.ayahs.length;i++){const row=data.ayahs[i],source=arabicVerses[i];if(row?.numberInSurah!==source?.numberInSurah||typeof row.text!=='string'||!row.text.trim()||row.text.length>12000)throw Error('Translation ayah mismatch');out.set(row.numberInSurah,row.text)}
+ for(let i=0;i<data.ayahs.length;i++){const row=data.ayahs[i],source=arabicVerses[i];if(row?.numberInSurah!==i+1||source?.numberInSurah!==i+1||(Number.isInteger(source?.number)&&row?.number!==source.number)||(row?.surah&&row.surah.number!==surah)||typeof row.text!=='string'||!row.text.trim()||row.text.length>12000)throw Error('Translation ayah mismatch');out.set(row.numberInSurah,row.text)}
  return out;
 }
 export async function loadTranslationSurah(surah,language,arabicVerses,{fetchImpl=globalThis.fetch,signal}={}){
