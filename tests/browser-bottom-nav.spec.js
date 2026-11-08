@@ -1,5 +1,6 @@
 import{test,expect}from '@playwright/test';
-import{mkdir}from 'node:fs/promises';
+import{mkdir,writeFile}from 'node:fs/promises';
+import{observeQuranRequests}from '../src/quran-playwright-observer.js';
 const sizes=[{name:'portrait',width:393,height:852},{name:'landscape',width:852,height:393}];
 for(const size of sizes){test(size.name+' bottom dock screenshot and accessibility',async({page})=>{
  await page.setViewportSize(size);await page.goto('/');const nav=page.getByRole('navigation',{name:'Bottom navigation'});await expect(nav).toBeVisible();const buttons=nav.getByRole('button');await expect(buttons).toHaveCount(11);
@@ -50,3 +51,25 @@ for(const size of sizes){test(size.name+' ayah Arabic translation visual isolati
  expect(result.translationTop).toBeGreaterThanOrEqual(result.arabicBottom-1);expect(result.cardWidth).toBeLessThanOrEqual(result.viewport+1);
  await mkdir('screenshots',{recursive:true});await card.screenshot({path:'screenshots/ayah-pair-'+size.name+'.png'});
 });}
+
+test('redacted browser network evidence with deterministic Arabic and Basmeih mocks',async({page})=>{
+ const observer=observeQuranRequests(page);
+ await page.route('https://api.alquran.cloud/v1/surah/2/*',async route=>{
+  const path=new URL(route.request().url()).pathname;
+  const edition=path.endsWith('/quran-uthmani')?'quran-uthmani':path.endsWith('/ms.basmeih')?'ms.basmeih':null;
+  if(!edition)return route.abort();
+  const ayahs=[{number:8,numberInSurah:1,text:edition==='quran-uthmani'?'الٓمٓ':'Alif, Laam, Miim.'},{number:9,numberInSurah:2,text:edition==='quran-uthmani'?'ذَٰلِكَ الْكِتَابُ':'Kitab Al-Quran ini'}];
+  await route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({code:200,status:'OK',data:{number:2,edition:{identifier:edition,type:edition==='ms.basmeih'?'translation':'quran'},ayahs}})});
+ });
+ await page.goto('/');
+ const result=await page.evaluate(async()=>{
+  const urls=['quran-uthmani','ms.basmeih'].map(x=>'https://api.alquran.cloud/v1/surah/2/'+x);
+  return Promise.all(urls.map(async url=>(await(await fetch(url)).json()).data.ayahs.map(v=>({number:v.number,numberInSurah:v.numberInSurah}))));
+ });
+ expect(result[0]).toEqual(result[1]);expect(result[0]).toEqual([{number:8,numberInSurah:1},{number:9,numberInSurah:2}]);
+ const records=observer.records.filter(x=>x.endpoint==='arabic-uthmani'||x.endpoint==='malay-basmeih');
+ expect(records.some(x=>x.endpoint==='arabic-uthmani'&&x.status===200)).toBeTruthy();
+ expect(records.some(x=>x.endpoint==='malay-basmeih'&&x.status===200)).toBeTruthy();
+ await mkdir('test-results',{recursive:true});await writeFile('test-results/quran-network-redacted.json',JSON.stringify(records,null,2));
+ observer.stop();
+});
