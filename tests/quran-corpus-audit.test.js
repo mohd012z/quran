@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{auditCorpus,EXPECTED_COUNTS,TOTAL_AYAHS}from '../src/quran-corpus-audit.js';
+function corpus(){let global=0;return EXPECTED_COUNTS.map((count,i)=>({number:i+1,ayahs:Array.from({length:count},(_,j)=>({number:++global,numberInSurah:j+1,text:'synthetic '+(i+1)+':'+(j+1),juz:1}))}))}
+test('canonical Hafs verse count is 6236 across 114 surahs',()=>{assert.equal(EXPECTED_COUNTS.length,114);assert.equal(TOTAL_AYAHS,6236)});
+test('identical synthetic corpora validate without claiming religious authenticity',()=>{const a=corpus();const result=auditCorpus(a,structuredClone(a));assert.equal(result.passed,true);assert.equal(result.checked,6236)});
+test('detect Arabic mismatch at precise verse',()=>{const a=corpus(),b=corpus();b[1].ayahs[0].text='wrong';const result=auditCorpus(a,b);assert.equal(result.passed,false);assert.ok(result.issues.some(x=>x.code==='ARABIC_TEXT'&&x.surah===2&&x.ayah===1))});
+test('detect shifted global verse number',()=>{const a=corpus(),b=corpus();b[1].ayahs[0].number++;assert.ok(auditCorpus(a,b).issues.some(x=>x.code==='VERSE_ID'&&x.surah===2&&x.ayah===1))});
+test('detect shifted Malay translation identity',()=>{const a=corpus(),b=corpus(),t=corpus();t[1].ayahs[0].number++;assert.ok(auditCorpus(a,b,{translation:t}).issues.some(x=>x.code==='TRANSLATION_ALIGNMENT'&&x.surah===2&&x.ayah===1))});
+test('reject missing surah and altered Juz boundary',()=>{const a=corpus(),b=corpus();assert.equal(auditCorpus(a,b.slice(1)).passed,false);b[0].ayahs[0].juz=2;assert.ok(auditCorpus(a,b).issues.some(x=>x.code==='JUZ_BOUNDARY'))});
