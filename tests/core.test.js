@@ -9,4 +9,4 @@ test('valid editions align',()=>assert.equal(alignEditions([edition(1,'بِسْ�
 test('mismatched global verse IDs rejected',()=>assert.throws(()=>alignEditions([edition(1,'بِسْمِ'),edition(2,'wrong'),edition(1,'تفسير'),edition(1,'','https://example.org/1.mp3')])));
 test('missing translation rejected',()=>assert.throws(()=>alignEditions([edition(1,'بِسْمِ'),edition(1,''),edition(1,'تفسير'),edition(1,'')])));
 test('non-HTTPS audio unavailable',()=>assert.equal(alignEditions([edition(1,'بِسْمِ'),edition(1,'In the name'),edition(1,'تفسير'),edition(1,'','http://example.org/1.mp3')])[0].audio,null));
-test('invalid Juz rejected',()=>assert.rejects(getJuz(31),/Invalid Juz/));
+test('invalid Juz rejected',()=>assert.throws(()=>getJuz(31),/Invalid Juz/));
