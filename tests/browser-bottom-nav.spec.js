@@ -267,9 +267,9 @@ test('compact reader hides navigation controls until explicitly expanded',async(
  await expect(panel).not.toHaveAttribute('open');
  await expect(page.locator('.ayah-card').first()).toBeVisible();
  await expect(panel.getByLabel('Cari ayat')).toBeHidden();
- await panel.locator('summary').click();
+ await panel.locator(':scope > summary').click();
  await expect(panel).toHaveAttribute('open','');
  await expect(panel.getByLabel('Cari ayat')).toBeVisible();
- await panel.locator('summary').click();
+ await panel.locator(':scope > summary').click();
  await expect(panel.getByLabel('Cari ayat')).toBeHidden();
 });
