@@ -188,3 +188,6 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 /* Keep the sticky player above the fixed reader navigation on mobile. */
 @media(max-width:850px){.kareem-audio-dock{bottom:calc(81px + env(safe-area-inset-bottom,0px))}}
 @media(max-width:850px) and (orientation:landscape) and (max-height:540px){.kareem-audio-dock{bottom:calc(67px + env(safe-area-inset-bottom,0px))}}
+
+/* A Surah opening is distinct from the numbered first ayah; never synthesize Quran text. */
+.surah-opening-basmala{margin:.35rem .7rem .65rem;padding:.7rem .85rem;text-align:center;border:1px solid #b4530944;border-radius:.85rem;background:var(--kareem-panel,#fff);color:var(--kareem-ink,#1c2930)}.surah-opening-basmala small{display:block;color:var(--kareem-green,#047857);font-size:.72rem}.surah-opening-basmala p{margin:.45rem 0 .1rem;font-family:'Amiri Quran','Amiri','Noto Naskh Arabic',serif;font-size:clamp(1.6rem,5vw,2.4rem);line-height:1.9}.reader-mobile-options:not([open])>*:not(summary){display:none!important}@media(max-width:600px){.surah-opening-basmala{margin:.25rem .5rem .4rem;padding:.45rem .6rem}.surah-opening-basmala p{margin:.15rem 0}}
