@@ -36,3 +36,23 @@ test('offline Alafasy MP3 requires correct digest and recognizable frame',async(
  await assert.rejects(verifyOfflineAlafasyRecording(bytes,{sha256:'1'.repeat(64)},{digest}),/SHA-256 mismatch/);
  await assert.rejects(verifyOfflineAlafasyRecording(Uint8Array.from([1,2,3,4]),{sha256:'0'.repeat(64)},{digest}),/not recognized MP3/);
 });
+
+test('offline-first loader fails closed when corpus package is missing',async()=>{
+ const {loadVerifiedOfflineCorpus}=await import('../src/offline-assets.js');
+ const fetchImpl=async()=>({ok:false,status:404});
+ await assert.rejects(loadVerifiedOfflineCorpus({fetchImpl}),/Offline manifest unavailable: 404/);
+});
+test('offline-first loader rejects unreviewed provenance without fetching corpus',async()=>{
+ const {loadVerifiedOfflineCorpus}=await import('../src/offline-assets.js');
+ const requested=[];
+ const fetchImpl=async(path)=>{requested.push(path);return {ok:true,json:async()=>({schema:1,sourceReviewed:false,licenseReference:'unknown',sourceUrl:'https://example.org'})}};
+ await assert.rejects(loadVerifiedOfflineCorpus({fetchImpl}),/provenance not approved/);
+ assert.deepEqual(requested,['/offline/corpus-manifest.json']);
+});
+test('offline Alafasy loader rejects missing licensed recording without requesting audio',async()=>{
+ const {loadVerifiedOfflineAlafasy}=await import('../src/offline-assets.js');
+ const requested=[];
+ const fetchImpl=async(path)=>{requested.push(path);return {ok:true,json:async()=>({schema:1,qari:'ar.alafasy',licenseReviewed:true,licenseReference:'reviewed-license',files:[]})}};
+ await assert.rejects(loadVerifiedOfflineAlafasy(1,{fetchImpl}),/recording not packaged/);
+ assert.deepEqual(requested,['/offline/alafasy-manifest.json']);
+});
