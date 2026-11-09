@@ -56,3 +56,19 @@ test('offline Alafasy loader rejects missing licensed recording without requesti
  await assert.rejects(loadVerifiedOfflineAlafasy(1,{fetchImpl}),/recording not packaged/);
  assert.deepEqual(requested,['/offline/alafasy-manifest.json']);
 });
+
+test('offline Quran and Alafasy fail explicitly with network disabled',async()=>{
+ const {loadVerifiedOfflineCorpus,loadVerifiedOfflineAlafasy}=await import('../src/offline-assets.js');
+ const requested=[];
+ const fetchImpl=async url=>{requested.push(url);throw new TypeError('Network disabled')};
+ await assert.rejects(loadVerifiedOfflineCorpus({fetchImpl}),/Network disabled/);
+ await assert.rejects(loadVerifiedOfflineAlafasy(1,{fetchImpl}),/Network disabled/);
+ assert.deepEqual(requested,['/offline/corpus-manifest.json','/offline/alafasy-manifest.json']);
+});
+test('offline corpus refuses false reviewed provenance without reading sacred text',async()=>{
+ const {loadVerifiedOfflineCorpus}=await import('../src/offline-assets.js');
+ const requested=[];
+ const fetchImpl=async url=>{requested.push(url);return {ok:true,json:async()=>({schema:1,sourceReviewed:true,licenseReference:'',sourceUrl:'https://tanzil.net'})}};
+ await assert.rejects(loadVerifiedOfflineCorpus({fetchImpl}),/provenance not approved/);
+ assert.deepEqual(requested,['/offline/corpus-manifest.json']);
+});
