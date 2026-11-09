@@ -191,3 +191,21 @@ html{scroll-padding-top:5.5rem}body{min-width:0;overflow-x:hidden}
 
 /* A Surah opening is distinct from the numbered first ayah; never synthesize Quran text. */
 .surah-opening-basmala{margin:.35rem .7rem .65rem;padding:.7rem .85rem;text-align:center;border:1px solid #b4530944;border-radius:.85rem;background:var(--kareem-panel,#fff);color:var(--kareem-ink,#1c2930)}.surah-opening-basmala small{display:block;color:var(--kareem-green,#047857);font-size:.72rem}.surah-opening-basmala p{margin:.45rem 0 .1rem;font-family:'Amiri Quran','Amiri','Noto Naskh Arabic',serif;font-size:clamp(1.6rem,5vw,2.4rem);line-height:1.9}.reader-mobile-options:not([open])>*:not(summary){display:none!important}@media(max-width:600px){.surah-opening-basmala{margin:.25rem .5rem .4rem;padding:.45rem .6rem}.surah-opening-basmala p{margin:.15rem 0}}
+
+/* Mobile drawer occupies the usable screen, independent of short page content. */
+@media(max-width:850px){
+ .kareem-sidebar{position:fixed;top:var(--quran-header-height,66px);bottom:calc(81px + env(safe-area-inset-bottom,0px));height:auto;max-height:none;overscroll-behavior:contain}
+ .kareem-sidebar-list{flex:1;min-height:0;overflow-y:auto}
+ .kareem-sidebar-backdrop{position:fixed;top:var(--quran-header-height,66px);bottom:calc(81px + env(safe-area-inset-bottom,0px));height:auto}
+}
+@media(max-width:850px) and (orientation:landscape) and (max-height:540px){
+ .kareem-sidebar,.kareem-sidebar-backdrop{bottom:calc(67px + env(safe-area-inset-bottom,0px))}
+}
+/* The independent moon control must theme nested reading panels, not only the shell. */
+.kareem-dark .study-panel,.kareem-dark .study-topic,.kareem-dark .history-reader,.kareem-dark .reader-mobile-options,.kareem-dark .surah-opening-basmala,.kareem-dark .verse-translation,.kareem-dark .ayah-list .verse-translation.translation-audio-active,.kareem-dark .ayah-list .ayah-card.ayah-audio-playing .arabic{background:#1e293b!important;color:#f1f5f9!important;border-color:#64748b!important}
+.kareem-dark .study-panel h2,.kareem-dark .study-panel h3,.kareem-dark .study-panel h4,.kareem-dark .study-panel p,.kareem-dark .study-panel label,.kareem-dark .study-topic p,.kareem-dark .history-reader p,.kareem-dark .history-reader h3,.kareem-dark .history-reader h4{color:#f1f5f9!important}
+.kareem-dark .study-panel button,.kareem-dark .study-panel select,.kareem-dark .study-panel input{color:#f1f5f9;background:#334155;border-color:#64748b}
+.kareem-dark .study-panel button[aria-pressed=true]{background:#047857;color:#fff}
+.kareem-dark .study-panel a{color:#6ee7b7}
+.kareem-dark .quran-footer{color:#cbd5e1}
+@media(prefers-reduced-motion:reduce){.kareem-sidebar{transition:none}}
