@@ -37,7 +37,13 @@ for(const size of sizes){test(size.name+' compact reader uses sidebar instead of
  await expect(page.locator('.ayah-card').first()).toBeVisible();
  await page.getByRole('button',{name:'Buka senarai Surah'}).click();
  await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).toHaveClass(/is-open/);
- await page.getByRole('button',{name:'Tutup senarai Surah'}).click();
+ if(size.width<=850){
+  await page.getByRole('button',{name:'Tutup senarai Surah'}).click();
+  await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).not.toHaveClass(/is-open/);
+ }else{
+  await expect(page.getByRole('button',{name:'Tutup senarai Surah'})).toHaveCount(0);
+  await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).toBeVisible();
+ }
  await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-'+size.name+'.png'});
 });}
 
