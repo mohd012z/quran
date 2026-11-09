@@ -32,6 +32,17 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Assert Git LFS pulled real assets (no pointer files)
+        run: |
+          set -euo pipefail
+          if grep -rlq "version https://git-lfs.github.com/spec/v1" public/offline/ offline-sources/; then
+            echo "ERROR: Git LFS pointer files found instead of real assets" >&2
+            exit 1
+          fi
+          test "$(find public/offline/alafasy -name '*.mp3' | wc -l)" -eq 6236
+          test -s public/offline/corpus.json
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
