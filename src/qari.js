@@ -23,3 +23,13 @@ export function validateOfflineAlafasyManifest(manifest){
  }
  return manifest;
 }
+
+export async function verifyOfflineAlafasyRecording(bytes,entry,{digest=globalThis.crypto?.subtle?.digest?.bind(globalThis.crypto.subtle)}={}){
+ if(!(bytes instanceof Uint8Array)||bytes.byteLength<4||typeof digest!=='function'||!entry||!(/^[a-f0-9]{64}$/.test(entry.sha256||'')))throw Error('Unverified offline audio recording');
+ const hash=Array.from(new Uint8Array(await digest('SHA-256',bytes))).map(x=>x.toString(16).padStart(2,'0')).join('');
+ if(hash!==entry.sha256)throw Error('Offline audio SHA-256 mismatch');
+ if(bytes[0]!==0x49||bytes[1]!==0x44||bytes[2]!==0x33) {
+  if(bytes[0]!==0xff||(bytes[1]&0xe0)!==0xe0)throw Error('Offline recording is not recognized MP3');
+ }
+ return bytes;
+}
