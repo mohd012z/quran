@@ -114,7 +114,7 @@ jobs:
           retention-days: 7
 
   verify-corpus:
-    if: github.ref == 'refs/heads/research/quran-tajweed-foundation-20261108'
+    if: github.ref == 'refs/heads/research/quran-tajweed-foundation-20261108' || github.head_ref == 'research/quran-tajweed-foundation-20261108'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
