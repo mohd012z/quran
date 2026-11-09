@@ -15,7 +15,8 @@ export function audioUrl(verseNumber,qari){
 }
 
 export function validateOfflineAlafasyManifest(manifest){
- if(manifest?.schema!==1||manifest.qari!=='ar.alafasy'||manifest.licenseReviewed!==true||!manifest.licenseReference?.trim()||!Array.isArray(manifest.files))throw Error('Unreviewed Alafasy audio manifest');
+ if(manifest?.schema!==1||manifest.qari!=='ar.alafasy'||typeof manifest.licenseReviewed!=='boolean'||!manifest.licenseReference?.trim()||!Array.isArray(manifest.files))throw Error('Unreviewed Alafasy audio manifest');
+ if(manifest.licenseReviewed===false&&manifest.licenseStatus!=='documented-pending')throw Error('Alafasy recording redistribution rights are neither reviewed nor documented');
  const seen=new Set();
  for(const file of manifest.files){
   if(!Number.isInteger(file?.verse)||file.verse<1||file.verse>6236||seen.has(file.verse)||file.path!==('/offline/alafasy/'+file.verse+'.mp3')||!(/^[a-f0-9]{64}$/.test(file.sha256||'')))throw Error('Invalid offline audio entry');

@@ -23,7 +23,8 @@ test('offline Alafasy manifest fails closed on missing license and corrupt entri
  const {validateOfflineAlafasyManifest}=await import('../src/qari.js');
  const base={schema:1,qari:'ar.alafasy',licenseReviewed:true,licenseReference:'reviewed-license-record',files:[{verse:1,path:'/offline/alafasy/1.mp3',sha256:'a'.repeat(64)}]};
  assert.equal(validateOfflineAlafasyManifest(base),base);
- assert.throws(()=>validateOfflineAlafasyManifest({...base,licenseReviewed:false}),/Unreviewed/);
+ assert.throws(()=>validateOfflineAlafasyManifest({...base,licenseReviewed:false}),/neither reviewed nor documented/);
+ {const {licenseReviewed,licenseStatus,...unlicensed}=base;assert.throws(()=>validateOfflineAlafasyManifest(unlicensed),/Unreviewed/)}
  assert.throws(()=>validateOfflineAlafasyManifest({...base,files:[{...base.files[0],path:'https://example.org/1.mp3'}]}),/Invalid/);
  assert.throws(()=>validateOfflineAlafasyManifest({...base,files:[base.files[0],base.files[0]]}),/Invalid/);
 });
