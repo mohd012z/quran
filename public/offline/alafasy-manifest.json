@@ -5,7 +5,7 @@
   "bitrateKbps": 128,
   "licenseReviewed": false,
   "licenseStatus": "documented-pending",
-  "licenseReference": "Recording: Mishary Rashid Alafasy, EveryAyah 128kbps collection, mirrored by Raf0707/q7h_alafasy (generated from alafasy.zip, everyayah.com). Redistribution terms are DOCUMENTED here but not yet independently confirmed by the rights holder, so licenseReviewed stays false. This build ships the audio for non-commercial personal/research use; obtain written permission (or use the iptvchecker/content-everyayah SHA-256-verified source records) before commercial distribution. See docs/OFFLINE_ASSET_RIGHTS.md.",
+  "licenseReference": "Recording: Mishary Rashid Alafasy, EveryAyah 128kbps collection, mirrored by Raf0707/q7h_alafasy (generated from alafasy.zip, everyayah.com). Redistribution terms are DOCUMENTED here but not yet independently confirmed by the rights holder, so licenseReviewed stays false. Audio is downloaded on demand per verse (served from the audio-pack branch via GitHub Pages) for non-commercial personal/research use; obtain written permission before commercial distribution. See docs/OFFLINE_ASSET_RIGHTS.md.",
   "files": [
     {
       "verse": 1,

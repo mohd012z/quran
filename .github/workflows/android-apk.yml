@@ -37,12 +37,17 @@ jobs:
       - name: Assert Git LFS pulled real assets (no pointer files)
         run: |
           set -euo pipefail
-          if grep -rlq "version https://git-lfs.github.com/spec/v1" public/offline/ offline-sources/; then
-            echo "ERROR: Git LFS pointer files found instead of real assets" >&2
+          # offline-sources/ is LFS-tracked and must be real files, not pointers.
+          if grep -rlq "version https://git-lfs.github.com/spec/v1" offline-sources/; then
+            echo "ERROR: Git LFS pointer files found in offline-sources/" >&2
             exit 1
           fi
-          test "$(find public/offline/alafasy -name '*.mp3' | wc -l)" -eq 6236
+          # public/offline/ ships only the text corpus + manifests (no audio);
+          # it must be plain, pointer-free.
           test -s public/offline/corpus.json
+          test -s public/offline/corpus-manifest.json
+          test -s public/offline/alafasy-manifest.json
+          test ! -e public/offline/alafasy
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -61,6 +66,15 @@ jobs:
           npm test
           npm run build
           test -f dist/index.html
+          # On-demand audio model: the bundle must contain ZERO audio files.
+          # Alafasy MP3s are downloaded per-verse at runtime from the pinned
+          # audio-pack (GitHub Pages) and cached in IndexedDB.
+          if find dist -name '*.mp3' -print -quit | grep -q .; then
+            echo "ERROR: MP3 files found in the web bundle; audio must be on-demand, not compiled in" >&2
+            find dist -name '*.mp3' -print
+            exit 1
+          fi
+          echo "OK: web bundle ships text + manifests only (no audio)"
       - name: Generate Capacitor Android wrapper
         run: |
           npm install --no-save --no-audit --no-fund @capacitor/core@6.2.1 @capacitor/cli@6.2.1 @capacitor/android@6.2.1
