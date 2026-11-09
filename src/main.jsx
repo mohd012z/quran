@@ -1,3 +1,4 @@
+import{fatihahReadingLabel}from './fatihah-presentation.js';
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import QuranSettingsSheet from './quran-settings.jsx';
 import BottomNavigation from './bottom-navigation.jsx';
@@ -54,10 +55,6 @@ function splitVerifiedBasmalaDisplay(text,surah,ayah){
  if(matches.slice(0,4).map(m=>bare(m[0])).join(' ')!=='بسم الله الرحمن الرحيم')return null;
  const offset=matches[4].index;
  return {opening:text.slice(0,offset),remainder:text.slice(offset)};
-}
-function fatihahReadingLabel(surah,numberInSurah){
- if(surah!==1)return 'Ayat '+numberInSurah;
- return numberInSurah===1?'Basmalah · pembukaan (rujukan 1:1)':'Baris bacaan '+(numberInSurah-1)+' · rujukan 1:'+numberInSurah;
 }
 function App(){
  const[display,setDisplay]=useState(readDisplay),[readerSection,setReaderSection]=useState('surah'),[juzBusy,setJuzBusy]=useState(false),[juzError,setJuzError]=useState(''),[settings,setSettings]=useState(loadReaderSettings),[tab,setTab]=useState('baca'),[surahs,setSurahs]=useState([]),[surah,setSurah]=useState(()=>readMushaf().surah),[verses,setVerses]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[query,setQuery]=useState(''),[studyQuery,setStudyQuery]=useState(''),[historyQuery,setHistoryQuery]=useState(''),[historyCategory,setHistoryCategory]=useState('all'),[historyMonth,setHistoryMonth]=useState('all'),[openHistory,setOpenHistory]=useState(null),[historyBook,setHistoryBook]=useState('muhammad'),[historyChapter,setHistoryChapter]=useState('revelation'),[historyProgress,setHistoryProgress]=useState(()=>readHistoryProgress(globalThis.localStorage)),[eventPrefs,setEventPrefs]=useState(()=>readEventReminderPreferences(globalThis.localStorage)),[eventReminderStatus,setEventReminderStatus]=useState(''),[duaQuery,setDuaQuery]=useState(''),[duaCategory,setDuaCategory]=useState('all'),[reminder,setReminder]=useState(()=>readReminder(globalThis.localStorage)),[reminderNotice,setReminderNotice]=useState(false),[nativeStatus,setNativeStatus]=useState(''),[scope,setScope]=useState('all'),[bookmarks,setBookmarks]=useState(readBookmarks),[selected,setSelected]=useState(null),[maqam,setMaqam]=useState('bayyati'),[pitch,setPitch]=useState('medium'),[shareAyah,setShareAyah]=useState(null),[shareNotice,setShareNotice]=useState(''),[mushaf,setMushaf]=useState(readMushaf),[readingGuide,setReadingGuide]=useState(()=>readMushaf().guide),[readingMode,setReadingMode]=useState(()=>readMushaf().mode);
