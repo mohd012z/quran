@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "arabicEdition": "quran-uthmani",
+  "translationEdition": "ms.basmeih",
+  "sha256": "aa0b8e216b07eb3818e2c2e524fb952d904eec832475ecaaaeddeda80d2d85fa",
+  "sourceReviewed": true,
+  "sourceUrl": "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt",
+  "licenseReference": "Arabic: Tanzil Project Uthmani 1.1, CC-BY-3.0 (verbatim, attribution, tanzil.net) — byte-exact SHA-256 ac0724796cbbda0f4801470fbbd11d0f3c5802067bae0493466d0128b0c667af. Malay: Abdullah Muhammad Basmeih (ms.basmeih) via alquran.cloud, cross-checked against independent fawazahmed0/quran-api copy; Tanzil lists translations for non-commercial use. Non-commercial research build, no billing.",
+  "retrievedAt": "2026-11-09T00:00:00.000Z",
+  "canonical": {
+    "surahs": 114,
+    "ayahs": 6236,
+    "contentSha256": "36da55e256f54f4838b6fa1c78781734346c8d9ffde52daf5a3cbfa32626a08c",
+    "edition": "tanzil-uthmani-v1.1"
+  },
+  "crossChecks": {
+    "arabicTanzilVsAclRendering": 4359,
+    "malayAclVsFawaz": 6197,
+    "juzAclVsQuranJson": "0/6236"
+  }
+}
