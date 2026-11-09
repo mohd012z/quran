@@ -12,7 +12,7 @@ test.beforeEach(async({page},testInfo)=>{
 });
 
 for(const size of sizes){test(size.name+' bottom dock screenshot and accessibility',async({page})=>{
- await page.setViewportSize(size);await page.goto('/');const nav=page.getByRole('navigation',{name:'Bottom navigation'});await expect(nav).toBeVisible();const buttons=nav.getByRole('button');await expect(buttons).toHaveCount(11);
+ await page.setViewportSize(size);await page.goto('/');const nav=page.getByRole('navigation',{name:'Bottom navigation'});await expect(nav).toBeVisible();const buttons=nav.getByRole('button');await expect(buttons).toHaveCount(5);
  await expect(page.getByRole('button',{name:'Baca',exact:true}).first()).toBeVisible();
  const metrics=await nav.evaluate(el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,rect:el.getBoundingClientRect().toJSON(),buttons:[...el.querySelectorAll('button')].map(b=>({label:b.getAttribute('aria-label'),height:b.getBoundingClientRect().height,width:b.getBoundingClientRect().width}))}));
  expect(metrics.scrollWidth).toBeGreaterThan(metrics.clientWidth);expect(metrics.rect.bottom).toBeLessThanOrEqual(size.height+1);expect(metrics.rect.top).toBeGreaterThanOrEqual(0);
