@@ -27,3 +27,12 @@ test('offline Alafasy manifest fails closed on missing license and corrupt entri
  assert.throws(()=>validateOfflineAlafasyManifest({...base,files:[{...base.files[0],path:'https://example.org/1.mp3'}]}),/Invalid/);
  assert.throws(()=>validateOfflineAlafasyManifest({...base,files:[base.files[0],base.files[0]]}),/Invalid/);
 });
+
+test('offline Alafasy MP3 requires correct digest and recognizable frame',async()=>{
+ const {verifyOfflineAlafasyRecording}=await import('../src/qari.js');
+ const bytes=Uint8Array.from([0x49,0x44,0x33,0x04,0x00]);
+ const digest=async()=>new Uint8Array(32).buffer;
+ assert.deepEqual(await verifyOfflineAlafasyRecording(bytes,{sha256:'0'.repeat(64)},{digest}),bytes);
+ await assert.rejects(verifyOfflineAlafasyRecording(bytes,{sha256:'1'.repeat(64)},{digest}),/SHA-256 mismatch/);
+ await assert.rejects(verifyOfflineAlafasyRecording(Uint8Array.from([1,2,3,4]),{sha256:'0'.repeat(64)},{digest}),/not recognized MP3/);
+});
