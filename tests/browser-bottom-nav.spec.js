@@ -188,6 +188,10 @@ for(const size of sizes){test(size.name+' Al-Fatihah opening labels preserve can
  await expect(second).toHaveAttribute('data-verse-id','2');
  await expect(first.locator(':scope > .arabic')).toContainText('LAYOUT_FIXTURE_1');
  await expect(second.locator(':scope > .arabic')).toContainText('LAYOUT_FIXTURE_2');
+ await expect(first.locator(':scope > .verse-translation')).toContainText('MALAY_FIXTURE_1');
+ await expect(second.locator(':scope > .verse-translation')).toContainText('MALAY_FIXTURE_2');
+ await expect(first.getByRole('button',{name:'Dengar ayat 1'})).toHaveCount(1);
+ await expect(second.getByRole('button',{name:'Dengar ayat 2'})).toHaveCount(1);
  await mkdir('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/fatihah-reading-'+size.name+'.png'});
 });}
