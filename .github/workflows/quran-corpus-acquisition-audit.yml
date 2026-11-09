@@ -41,7 +41,7 @@ jobs:
               for line in text.splitlines():
                   if not line or line.startswith("#"):continue
                   match=re.fullmatch(r"(\d+)\|(\d+)\|(.+)",line)
-                  if not match:raise ValueError("unexpected corpus row")
+                  if not match:raise ValueError("unexpected corpus row at line "+str(text.splitlines().index(line)+1)+": "+repr(line[:100]))
                   rows.append((int(match[1]),int(match[2]),match[3]))
               if len(rows)!=6236:raise ValueError(f"expected 6236 ayahs, got {len(rows)}")
               surahs={a for a,_,_ in rows}
