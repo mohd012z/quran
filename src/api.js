@@ -1,6 +1,16 @@
 const BASE='https://api.alquran.cloud/v1';
 export async function json(path,timeout=12000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);try{const response=await fetch(BASE+path,{signal:controller.signal});if(!response.ok)throw new Error('HTTP '+response.status);const body=await response.json();if(body?.code!==200||body?.status!=='OK'||body?.data==null)throw new Error('Invalid Quran API response');return body.data}catch(error){throw new Error(error.name==='AbortError'?'Quran API request timed out':error.message)}finally{clearTimeout(timer)}}
-export const getSurahs=()=>json('/surah');
+export async function getSurahs(){
+ try{
+  const {loadVerifiedOfflineCorpus}=await import('./offline-assets.js');
+  const corpus=await loadVerifiedOfflineCorpus();
+  return corpus.surahs.map(s=>{
+   if(typeof s.name!=='string'||!s.name.trim()||typeof s.englishName!=='string'||!s.englishName.trim()||typeof s.englishNameTranslation!=='string'||typeof s.revelationType!=='string'||!['Meccan','Medinan'].includes(s.revelationType))throw Error('Offline Surah metadata incomplete: '+s.number);
+   return {number:s.number,name:s.name,englishName:s.englishName,englishNameTranslation:s.englishNameTranslation,revelationType:s.revelationType,numberOfAyahs:s.ayahs.length};
+  });
+ }catch(error){if(!/^Offline (asset|manifest) unavailable: 404$/.test(error.message))throw error}
+ return json('/surah');
+}
 export const getMeta=()=>json('/meta');
 export const getJuz=(n)=>{if(!Number.isInteger(n)||n<1||n>30)throw new Error('Invalid Juz');return json('/juz/'+n+'/quran-uthmani')};
 export function alignEditions(editions,expectedSurah){if(!Array.isArray(editions)||editions.length!==4)throw new Error('Missing Quran editions');const [arabic,english,tafsir,audio]=editions;const count=arabic?.ayahs?.length;if(!count||editions.some(e=>e?.ayahs?.length!==count))throw new Error('Verse count mismatch');if(expectedSurah!==undefined&&editions.some(e=>e?.number!==expectedSurah))throw new Error('Surah identity mismatch');return arabic.ayahs.map((a,i)=>{const b=english.ayahs[i],c=tafsir.ayahs[i],d=audio.ayahs[i];if(!Number.isInteger(a.number)||a.numberInSurah!==i+1||![b,c,d].every(x=>x?.number===a.number&&x?.numberInSurah===a.numberInSurah&&(!x.surah||x.surah.number===expectedSurah))||a.surah&&a.surah.number!==expectedSurah||![a.text,b.text,c.text].every(x=>typeof x==='string'&&x.length>0))throw new Error('Verse identity or text mismatch at index '+i);if(expectedSurah===2&&i===0&&!/^الٓ?مٓ?$/u.test(a.text.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'')))throw new Error('Canonical Quran anchor mismatch: 2:1');return {number:a.number,numberInSurah:a.numberInSurah,juz:a.juz,arabic:a.text,english:b.text,tafsir:c.text,audio:typeof d.audio==='string'&&d.audio.startsWith('https://')?d.audio:null}})};
