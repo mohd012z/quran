@@ -151,7 +151,7 @@ jobs:
               if len(expected_counts)!=114 or sum(expected_counts)!=6236:raise ValueError("invalid reference chapter counts")
               if any(not any(0x0600<=ord(ch)<=0x06ff for ch in line) for line in lines):
                   raise ValueError("non-Arabic ayah line")
-              result.update(ayahs=len(lines),surahs=len(expected_counts),surah_ayah_counts=expected_counts,structural_verification=True)
+              result.update(ayahs=len(lines),surahs=len(expected_counts),surah_ayah_counts=expected_counts,structural_verification=True, surah_boundary_parity_verified=False, publisher_byte_parity_verified=False, audit_scope="Mirror SHA256, 6236 Arabic lines, and reference chapter-count table only")
               # Mirror parity alone is not publisher verification.
               result["verified"]=False
               result["reason"]="Official Tanzil publisher byte comparison not performed; do not publish"
