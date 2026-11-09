@@ -11,7 +11,8 @@ export async function getSurah(number){
   const {loadVerifiedOfflineSurah}=await import('./offline-assets.js');
   const surah=await loadVerifiedOfflineSurah(number);
   return surah.ayahs.map(a=>({number:a.number,numberInSurah:a.numberInSurah,juz:a.juz,arabic:a.arabic,english:null,tafsir:null,audio:null}));
- }catch(_offlineUnavailable){
+ }catch(error){
+  if(!/^Offline (asset|manifest) unavailable: 404$/.test(error.message))throw error;
   const ids=['quran-uthmani','en.sahih','ar.muyassar','ar.alafasy'];
   const editions=await Promise.all(ids.map(id=>json('/surah/'+number+'/'+id)));
   return alignEditions(editions,number);
