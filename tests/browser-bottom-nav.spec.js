@@ -30,25 +30,15 @@ for(const size of sizes){test(size.name+' bottom dock screenshot and accessibili
  await expect(nav).toBeVisible();await expect(nav.locator('[aria-current="page"]')).toBeFocused();
 });}
 
-for(const size of sizes){test(size.name+' compact reader toolbar and advanced disclosure',async({page})=>{
+for(const size of sizes){test(size.name+' compact reader uses sidebar instead of duplicate options',async({page})=>{
  await page.setViewportSize(size);await page.goto('/');
- const options=page.locator('details.reader-mobile-options');await expect(options).toBeVisible();await expect(options).not.toHaveAttribute('open','');await expect(options.locator(':scope > summary')).toHaveCount(1);await options.locator(':scope > summary').click();
- const toolbar=page.locator('.reader-toolbar');await expect(toolbar).toBeVisible();
- await expect(toolbar.getByRole('combobox',{name:'Pilih Surah'})).toBeVisible();
- await expect(toolbar.getByRole('textbox',{name:'Cari ayat'})).toBeVisible();
- await expect(toolbar.getByRole('combobox',{name:'Penapis bacaan'})).toBeVisible();
- const disclosure=page.locator('details.reader-more-controls');await expect(disclosure).toBeVisible();
- await expect(disclosure).not.toHaveAttribute('open','');
- await disclosure.locator('summary').focus();await page.keyboard.press('Enter');
- await expect(disclosure).toHaveAttribute('open','');
- await expect(disclosure.getByRole('combobox',{name:'Bilangan ulang ayat'})).toBeVisible();
- await expect(disclosure.getByRole('combobox',{name:'Mod bacaan perkataan'})).toBeVisible();
- await expect(disclosure.getByRole('button',{name:/Sambung bacaan/})).toBeVisible();
- const dimensions=await toolbar.evaluate(el=>({width:el.getBoundingClientRect().width,viewport:window.innerWidth,scrollWidth:document.documentElement.scrollWidth}));
- expect(dimensions.width).toBeLessThanOrEqual(dimensions.viewport+1);
- expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.viewport+1);
- await expect(page.locator('.ayah-card').first()).toBeVisible({timeout:15000});await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-'+size.name+'.png',fullPage:true});
- await disclosure.locator('summary').focus();await page.keyboard.press('Enter');await expect(disclosure).not.toHaveAttribute('open','');
+ await expect(page.locator('details.reader-mobile-options')).toHaveCount(0);
+ await expect(page.locator('.compact-surah-header')).toBeVisible();
+ await expect(page.locator('.ayah-card').first()).toBeVisible();
+ await page.getByRole('button',{name:'Buka senarai Surah'}).click();
+ await expect(page.getByRole('complementary',{name:'Navigasi Surah dan Juz'})).toHaveClass(/is-open/);
+ await page.getByRole('button',{name:'Tutup senarai Surah'}).click();
+ await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-'+size.name+'.png'});
 });}
 
 for(const size of sizes){test(size.name+' ayah Arabic translation visual isolation',async({page})=>{
@@ -133,46 +123,18 @@ test('audio playback highlights only the active ayah and clears on pause',async(
  expect(typeof motion).toBe('string');
 });
 
-test('Khat themes and translation follow active audio without changing Arabic source',async({page})=>{
- await installLayoutQuranMocks(page);
- await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')});
- await page.goto('/');
- const first=page.locator('.ayah-card').first();
- await expect(first).toBeVisible();
- const original=await first.locator('p.arabic').textContent();
- await page.locator('details.reader-mobile-options > summary').click();
- const controls=page.getByRole('group',{name:'Pilihan bacaan Khat dan audio'});
- await expect(controls).toBeVisible();
- await expect(page.locator('.ayah-list')).toHaveClass(/khat-mushaf/);
- await controls.getByRole('combobox',{name:'Gaya Khat'}).selectOption('modern');
- await expect(page.locator('.ayah-list')).toHaveClass(/khat-modern/);
- expect(await first.locator('p.arabic').textContent()).toBe(original);
+test('ayah audio highlights only current Arabic and Malay verse',async({page})=>{
+ await installLayoutQuranMocks(page);await page.goto('/');
+ await expect(page.locator('details.reader-mobile-options')).toHaveCount(0);
+ const first=page.locator('.ayah-card').first();const original=await first.locator('p.arabic').textContent();
  await first.getByRole('button',{name:'Dengar ayat 1'}).click();
- const audio=first.locator('audio');
- await expect(audio).toHaveCount(1);
- await audio.dispatchEvent('play');
- await expect(first.locator('.verse-translation')).toHaveClass(/translation-audio-active/);
- await controls.getByRole('checkbox',{name:'Serlah terjemahan'}).uncheck();
- await expect(first.locator('.verse-translation')).not.toHaveClass(/translation-audio-active/);
- await controls.getByRole('checkbox',{name:'Serlah terjemahan'}).check();
- await audio.dispatchEvent('pause');
- await expect(first.locator('.verse-translation')).not.toHaveClass(/translation-audio-active/);
- expect(await first.locator('p.arabic').textContent()).toBe(original);
-});
-test('ayah follow option can be disabled while audio highlight remains',async({page})=>{
- await installLayoutQuranMocks(page);
- await page.goto('/');
- await page.locator('details.reader-mobile-options > summary').click();
- const controls=page.getByRole('group',{name:'Pilihan bacaan Khat dan audio'});
- await controls.getByRole('checkbox',{name:'Ikut ayat audio'}).uncheck();
- const first=page.locator('.ayah-card').first();
- await first.getByRole('button',{name:'Dengar ayat 1'}).click();
- const audio=first.locator('audio');
+ const audio=first.locator('audio');await expect(audio).toHaveCount(1);
  await audio.dispatchEvent('play');
  await expect(first).toHaveClass(/ayah-audio-playing/);
- await expect(controls.getByRole('checkbox',{name:'Ikut ayat audio'})).not.toBeChecked();
+ await expect(first.locator('.verse-translation')).toHaveClass(/translation-audio-active/);
  await audio.dispatchEvent('pause');
- await expect(first).not.toHaveClass(/ayah-audio-playing/);
+ await expect(first.locator('.verse-translation')).not.toHaveClass(/translation-audio-active/);
+ expect(await first.locator('p.arabic').textContent()).toBe(original);
 });
 
 test('Kareem sidebar, dark mode and shared audio dock work with synthetic fixtures',async({page})=>{
@@ -192,84 +154,18 @@ test('Kareem sidebar, dark mode and shared audio dock work with synthetic fixtur
  await expect(page.locator('.quran-shell')).not.toHaveClass(/kareem-dark/);
  const first=page.locator('.ayah-card').first();
  await first.getByRole('button',{name:'Dengar ayat 1'}).click();
- const dock=page.getByLabel('Pemain audio ayat');
- await expect(dock).toBeVisible();
- await expect(dock.getByRole('combobox',{name:'Qari pemain'})).toBeVisible();
- await expect(dock.getByRole('combobox',{name:'Kelajuan audio'})).toHaveValue('1');
- await dock.getByRole('combobox',{name:'Kelajuan audio'}).selectOption('1.25');
- await expect(dock.getByRole('combobox',{name:'Kelajuan audio'})).toHaveValue('1.25');
- const audio=first.locator('audio');
- await audio.dispatchEvent('play');
- await expect(dock.getByRole('button',{name:'Jeda audio'})).toBeVisible();
- await audio.dispatchEvent('pause');
- await expect(dock.getByRole('button',{name:'Main audio'})).toBeVisible();
+ const audio=first.locator('audio');await expect(audio).toHaveCount(1);
+ await expect(page.getByLabel('Pemain audio ayat')).toHaveCount(0);
+ await audio.dispatchEvent('play');await expect(first).toHaveClass(/ayah-audio-playing/);
+ await audio.dispatchEvent('pause');await expect(first).not.toHaveClass(/ayah-audio-playing/);
 });
 
-for(const size of [{name:'portrait',width:390,height:844},{name:'landscape',width:844,height:390}]){
- test('Kareem audio dock remains in viewport during synthetic playback: '+size.name,async({page})=>{
-  await page.setViewportSize({width:size.width,height:size.height});
-  await installLayoutQuranMocks(page);
-  await page.goto('/');
-  const first=page.locator('.ayah-card').first();
-  await expect(first).toBeVisible();
-  await first.getByRole('button',{name:'Dengar ayat 1'}).click();
-  const audio=first.locator('audio');
-  await expect(audio).toHaveCount(1);
-  await audio.dispatchEvent('play');
-  const dock=page.getByLabel('Pemain audio ayat');
-  await expect(dock).toBeVisible();
-  await expect(dock.getByRole('button',{name:'Jeda audio'})).toBeVisible();
-  const metrics=await dock.evaluate(el=>{
-   const rect=el.getBoundingClientRect();
-   const nav=document.querySelector('.bottom-reader-tabs');
-   const nr=nav?.getBoundingClientRect();
-   return {top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right,
-    viewportWidth:innerWidth,viewportHeight:innerHeight,
-    navTop:nav&&!nav.classList.contains('nav-hidden')?nr.top:innerHeight};
-  });
-  expect(metrics.top).toBeGreaterThanOrEqual(-1);
-  expect(metrics.left).toBeGreaterThanOrEqual(-1);
-  expect(metrics.right).toBeLessThanOrEqual(metrics.viewportWidth+1);
-  expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight+1);
-  expect(metrics.bottom).toBeLessThanOrEqual(metrics.navTop+1);
-  await mkdir('screenshots',{recursive:true});
-  await page.screenshot({path:'screenshots/kareem-audio-dock-'+size.name+'.png'});
-  await audio.dispatchEvent('pause');
- });
-}
-
-for(const size of sizes)test('compact reader prioritizes actual ayah: '+size.name,async({page})=>{
- await installLayoutQuranMocks(page);
- await page.setViewportSize(size);
- await page.goto('/');
- const options=page.locator('details.reader-mobile-options');
- await expect(options).not.toHaveAttribute('open','');
- await expect(page.locator('.compact-surah-header')).toBeVisible();
- const first=page.locator('.ayah-card').first();
- await expect(first).toBeVisible();
- await expect(first.locator('p.arabic')).toContainText('LAYOUT_FIXTURE_1');
- await expect(first.locator('.verse-translation')).toContainText('MALAY_FIXTURE_1');
- const rect=await first.evaluate(el=>({top:el.getBoundingClientRect().top,width:el.getBoundingClientRect().width,viewport:innerWidth}));
- expect(rect.top).toBeLessThan(size.height);
- expect(rect.width).toBeLessThanOrEqual(rect.viewport+1);
- await options.locator(':scope > summary').click();
- await expect(page.getByRole('group',{name:'Pilihan bacaan Khat dan audio'})).toBeVisible();
- await options.locator(':scope > summary').click();
- await expect(options).not.toHaveAttribute('open','');
-});
-
-test('compact reader hides navigation controls until explicitly expanded',async({page})=>{
- await page.setViewportSize({width:390,height:844});
- await installLayoutQuranMocks(page);
- await page.goto('/');
- const panel=page.locator('details.reader-mobile-options');
- await expect(panel).toHaveCount(1);
- await expect(panel).not.toHaveAttribute('open');
- await expect(page.locator('.ayah-card').first()).toBeVisible();
- await expect(panel.getByLabel('Cari ayat')).toBeHidden();
- await panel.locator(':scope > summary').click();
- await expect(panel).toHaveAttribute('open','');
- await expect(panel.getByLabel('Cari ayat')).toBeVisible();
- await panel.locator(':scope > summary').click();
- await expect(panel.getByLabel('Cari ayat')).toBeHidden();
+for(const size of sizes)test('single audio control and compact reading in '+size.name,async({page})=>{
+ await page.setViewportSize(size);await installLayoutQuranMocks(page);await page.goto('/');
+ const first=page.locator('.ayah-card').first();await expect(first).toBeVisible();
+ await first.getByRole('button',{name:'Dengar ayat 1'}).click();
+ const audio=first.locator('audio');await expect(audio).toHaveCount(1);
+ await expect(page.getByLabel('Pemain audio ayat')).toHaveCount(0);
+ await audio.dispatchEvent('play');await expect(first).toHaveClass(/ayah-audio-playing/);
+ await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-audio-'+size.name+'.png'});
 });
