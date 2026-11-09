@@ -175,3 +175,19 @@ for(const size of sizes)test('single audio control and compact reading in '+size
  await audio.dispatchEvent('play');await expect(first).toHaveClass(/ayah-audio-playing/);
  await mkdir('screenshots',{recursive:true});await page.screenshot({path:'screenshots/reader-audio-'+size.name+'.png'});
 });
+
+for(const size of sizes){test(size.name+' Al-Fatihah opening labels preserve canonical audio and translation references',async({page})=>{
+ await page.setViewportSize(size);await page.goto('/');
+ const first=page.locator('.ayah-card[data-ayah="1"]');
+ const second=page.locator('.ayah-card[data-ayah="2"]');
+ await expect(first).toBeVisible({timeout:15000});
+ await expect(second).toBeVisible();
+ await expect(first.locator('.ayah-actions').first()).toContainText('Basmalah · pembukaan (rujukan 1:1)');
+ await expect(second.locator('.ayah-actions').first()).toContainText('Baris bacaan 1 · rujukan 1:2');
+ await expect(first).toHaveAttribute('data-verse-id','1');
+ await expect(second).toHaveAttribute('data-verse-id','2');
+ await expect(first.locator(':scope > .arabic')).toContainText('LAYOUT_FIXTURE_1');
+ await expect(second.locator(':scope > .arabic')).toContainText('LAYOUT_FIXTURE_2');
+ await mkdir('screenshots',{recursive:true});
+ await page.screenshot({path:'screenshots/fatihah-reading-'+size.name+'.png'});
+});}
