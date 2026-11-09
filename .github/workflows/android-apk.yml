@@ -113,67 +113,67 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-    verify-corpus:
-      if: github.ref == 'refs/heads/research/quran-tajweed-foundation-20261108'
-      runs-on: ubuntu-latest
-      timeout-minutes: 10
-      steps:
-        - name: Retrieve and verify without publishing
-          shell: bash
-          run: |
-            set -euo pipefail
-            mkdir -p evidence
-            python3 - <<'PY'
-            import hashlib, json, pathlib, re, urllib.request
-            root = pathlib.Path("evidence")
-            mirror = "https://raw.githubusercontent.com/iptvchecker/content-tanzil/main/tanzil-uthmani-1.1.txt"
-            expected = "ac0724796cbbda0f4801470fbbd11d0f3c5802067bae0493466d0128b0c667af"
-            result = {"source":mirror,"mirror_claimed_sha256":expected,"verified":False}
-            try:
-                req=urllib.request.Request(mirror,headers={"User-Agent":"quran-research-verifier/1.0"})
-                with urllib.request.urlopen(req,timeout=30) as response:
-                    data=response.read(4_000_001)
-                if len(data)>4_000_000: raise ValueError("file exceeds size cap")
-                actual=hashlib.sha256(data).hexdigest()
-                result.update(bytes=len(data),sha256=actual,mirror_checksum_matches=(actual==expected))
-                if actual!=expected: raise ValueError("mirror SHA-256 mismatch")
-                text=data.decode("utf-8-sig")
-                if "Tanzil Quran Text" not in text or "Copyright" not in text: raise ValueError("Tanzil notice missing")
-                rows=[]
-                for line in text.splitlines():
-                    if not line or line.startswith("#"):continue
-                    match=re.fullmatch(r"(\d+)\|(\d+)\|(.+)",line)
-                    if not match:raise ValueError("unexpected corpus row")
-                    rows.append((int(match[1]),int(match[2]),match[3]))
-                if len(rows)!=6236:raise ValueError(f"expected 6236 ayahs, got {len(rows)}")
-                surahs={a for a,_,_ in rows}
-                if surahs!=set(range(1,115)):raise ValueError("not 114 consecutive Surahs")
-                previous=(1,0)
-                for surah,ayah,arabic in rows:
-                    if not arabic.strip():raise ValueError("empty Arabic verse")
-                    if surah==previous[0]:
-                        if ayah!=previous[1]+1:raise ValueError("nonconsecutive ayah")
-                    elif surah==previous[0]+1:
-                        if ayah!=1:raise ValueError("surah does not start at ayah 1")
-                    else:raise ValueError("nonconsecutive surah")
-                    previous=(surah,ayah)
-                result.update(ayahs=len(rows),surahs=len(surahs),structural_verification=True)
-                # Mirror parity alone is not publisher verification.
-                result["verified"]=False
-                result["reason"]="Official Tanzil publisher byte comparison not performed; do not publish"
-            except Exception as exc:
-                result["error"]=str(exc)
-            (root/"audit.json").write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
-            print(json.dumps(result,indent=2,ensure_ascii=False))
-            if "error" in result:raise SystemExit(1)
-            PY
-        - name: Assert non-publishing gate
-          shell: bash
-          run: |
-            python3 - <<'PY'
-            import json
-            r=json.load(open("evidence/audit.json"))
-            assert r["structural_verification"] and r["mirror_checksum_matches"]
-            assert r["verified"] is False, "Publisher verification must be separate"
-            print("PASS: mirror structural audit only; publishing prohibited")
-            PY
+  verify-corpus:
+    if: github.ref == 'refs/heads/research/quran-tajweed-foundation-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Retrieve and verify without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 - <<'PY'
+          import hashlib, json, pathlib, re, urllib.request
+          root = pathlib.Path("evidence")
+          mirror = "https://raw.githubusercontent.com/iptvchecker/content-tanzil/main/tanzil-uthmani-1.1.txt"
+          expected = "ac0724796cbbda0f4801470fbbd11d0f3c5802067bae0493466d0128b0c667af"
+          result = {"source":mirror,"mirror_claimed_sha256":expected,"verified":False}
+          try:
+              req=urllib.request.Request(mirror,headers={"User-Agent":"quran-research-verifier/1.0"})
+              with urllib.request.urlopen(req,timeout=30) as response:
+                  data=response.read(4_000_001)
+              if len(data)>4_000_000: raise ValueError("file exceeds size cap")
+              actual=hashlib.sha256(data).hexdigest()
+              result.update(bytes=len(data),sha256=actual,mirror_checksum_matches=(actual==expected))
+              if actual!=expected: raise ValueError("mirror SHA-256 mismatch")
+              text=data.decode("utf-8-sig")
+              if "Tanzil Quran Text" not in text or "Copyright" not in text: raise ValueError("Tanzil notice missing")
+              rows=[]
+              for line in text.splitlines():
+                  if not line or line.startswith("#"):continue
+                  match=re.fullmatch(r"(\d+)\|(\d+)\|(.+)",line)
+                  if not match:raise ValueError("unexpected corpus row")
+                  rows.append((int(match[1]),int(match[2]),match[3]))
+              if len(rows)!=6236:raise ValueError(f"expected 6236 ayahs, got {len(rows)}")
+              surahs={a for a,_,_ in rows}
+              if surahs!=set(range(1,115)):raise ValueError("not 114 consecutive Surahs")
+              previous=(1,0)
+              for surah,ayah,arabic in rows:
+                  if not arabic.strip():raise ValueError("empty Arabic verse")
+                  if surah==previous[0]:
+                      if ayah!=previous[1]+1:raise ValueError("nonconsecutive ayah")
+                  elif surah==previous[0]+1:
+                      if ayah!=1:raise ValueError("surah does not start at ayah 1")
+                  else:raise ValueError("nonconsecutive surah")
+                  previous=(surah,ayah)
+              result.update(ayahs=len(rows),surahs=len(surahs),structural_verification=True)
+              # Mirror parity alone is not publisher verification.
+              result["verified"]=False
+              result["reason"]="Official Tanzil publisher byte comparison not performed; do not publish"
+          except Exception as exc:
+              result["error"]=str(exc)
+          (root/"audit.json").write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps(result,indent=2,ensure_ascii=False))
+          if "error" in result:raise SystemExit(1)
+          PY
+      - name: Assert non-publishing gate
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          r=json.load(open("evidence/audit.json"))
+          assert r["structural_verification"] and r["mirror_checksum_matches"]
+          assert r["verified"] is False, "Publisher verification must be separate"
+          print("PASS: mirror structural audit only; publishing prohibited")
+          PY
