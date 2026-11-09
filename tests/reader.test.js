@@ -72,3 +72,37 @@ test('offline corpus refuses false reviewed provenance without reading sacred te
  await assert.rejects(loadVerifiedOfflineCorpus({fetchImpl}),/provenance not approved/);
  assert.deepEqual(requested,['/offline/corpus-manifest.json']);
 });
+
+test('verified synthetic 114-Surah package loads with external network blocked',async()=>{
+ const {createHash}=await import('node:crypto');
+ const {loadVerifiedOfflineCorpus,loadVerifiedOfflineSurah}=await import('../src/offline-assets.js');
+ let globalNumber=0;
+ const surahs=Array.from({length:114},(_,index)=>{
+  const number=index+1;
+  const count=number===1?7:number===9?129:index<54?55:54;
+  return {number,name:'Synthetic '+number,englishName:'Synthetic '+number,englishNameTranslation:'Test only',revelationType:'Meccan',ayahs:Array.from({length:count},(_,i)=>({number:++globalNumber,numberInSurah:i+1,arabic:'تجربة',malay:'Ujian sintetik '+(i+1)}))};
+ });
+ // Keep exactly 6236 synthetic ayahs; no religious source text is copied.
+ const difference=6236-globalNumber;
+ const last=surahs[113].ayahs;
+ if(difference<0)last.splice(last.length+difference);
+ else for(let i=0;i<difference;i++)last.push({number:0,numberInSurah:0,arabic:'تجربة',malay:'Ujian sintetik'});
+ let id=0;for(const s of surahs)for(let i=0;i<s.ayahs.length;i++){s.ayahs[i].number=++id;s.ayahs[i].numberInSurah=i+1}
+ assert.equal(id,6236);
+ const bytes=new TextEncoder().encode(JSON.stringify({surahs}));
+ const sha256=createHash('sha256').update(bytes).digest('hex');
+ const manifest={schema:1,arabicEdition:'quran-uthmani',translationEdition:'ms.basmeih',sha256,sourceReviewed:true,sourceUrl:'https://example.org/fixture',licenseReference:'SYNTHETIC TEST ONLY'};
+ const requested=[];
+ const fetchImpl=async path=>{
+  requested.push(path);
+  if(path==='/offline/corpus-manifest.json')return {ok:true,json:async()=>manifest};
+  if(path==='/offline/corpus.json')return {ok:true,arrayBuffer:async()=>bytes.buffer};
+  throw Error('External network prohibited: '+path);
+ };
+ const digest=async(_,input)=>createHash('sha256').update(new Uint8Array(input)).digest();
+ const corpus=await loadVerifiedOfflineCorpus({fetchImpl,digest});
+ assert.equal(corpus.surahs.length,114);
+ const surah=await loadVerifiedOfflineSurah(9,{fetchImpl,digest});
+ assert.equal(surah.ayahs.length,129);
+ assert(requested.every(x=>x.startsWith('/offline/')));
+});
