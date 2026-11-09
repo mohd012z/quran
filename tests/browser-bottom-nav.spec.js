@@ -257,3 +257,19 @@ for(const size of sizes)test('compact reader prioritizes actual ayah: '+size.nam
  await options.locator(':scope > summary').click();
  await expect(options).not.toHaveAttribute('open','');
 });
+
+test('compact reader hides navigation controls until explicitly expanded',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await installLayoutQuranMocks(page);
+ await page.goto('/');
+ const panel=page.locator('details.reader-mobile-options');
+ await expect(panel).toHaveCount(1);
+ await expect(panel).not.toHaveAttribute('open');
+ await expect(page.locator('.ayah-card').first()).toBeVisible();
+ await expect(panel.getByLabel('Cari ayat')).toBeHidden();
+ await panel.locator('summary').click();
+ await expect(panel).toHaveAttribute('open','');
+ await expect(panel.getByLabel('Cari ayat')).toBeVisible();
+ await panel.locator('summary').click();
+ await expect(panel.getByLabel('Cari ayat')).toBeHidden();
+});
