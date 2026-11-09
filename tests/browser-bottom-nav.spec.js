@@ -195,3 +195,24 @@ for(const size of sizes){test(size.name+' Al-Fatihah opening labels preserve can
  await mkdir('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/fatihah-reading-'+size.name+'.png'});
 });}
+
+test('Al-Fatihah reading labels do not redirect audio highlighting or Malay translation',async({page})=>{
+ await installLayoutQuranMocks(page);
+ await page.addInitScript(()=>{localStorage.removeItem('quran-mushaf-v1');localStorage.removeItem('quran-reader-v1')});
+ await page.goto('/');
+ const first=page.locator('.ayah-card[data-ayah="1"]');
+ const second=page.locator('.ayah-card[data-ayah="2"]');
+ await expect(second).toBeVisible({timeout:15000});
+ await second.getByRole('button',{name:'Dengar ayat 2'}).click();
+ const audio=second.locator('audio');
+ await expect(audio).toHaveCount(1);
+ await audio.dispatchEvent('play');
+ await expect(second).toHaveClass(/ayah-audio-playing/);
+ await expect(second.locator('.verse-translation')).toHaveClass(/translation-audio-active/);
+ await expect(first).not.toHaveClass(/ayah-audio-playing/);
+ await expect(first.locator('.verse-translation')).not.toHaveClass(/translation-audio-active/);
+ await expect(second.locator(':scope > .verse-translation')).toContainText('MALAY_FIXTURE_2');
+ await audio.dispatchEvent('pause');
+ await expect(second).not.toHaveClass(/ayah-audio-playing/);
+ await expect(second.locator('.verse-translation')).not.toHaveClass(/translation-audio-active/);
+});
