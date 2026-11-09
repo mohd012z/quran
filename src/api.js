@@ -1,5 +1,5 @@
 const BASE='https://api.alquran.cloud/v1';
-export async function json(path,timeout=12000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);try{const response=await fetch(BASE+path,{signal:controller.signal});if(!response.ok)throw new Error('HTTP '+response.status);const body=await response.json();if(body?.code!==200||body?.status!=='OK'||body?.data==null)throw new Error('Invalid Quran API response');return body.data}catch(error){throw new Error(error.name==='AbortError'?'Quran API request timed out':error.message)}finally{clearTimeout(timer)}}
+export async function json(path,timeout=12000,fetchImpl=globalThis.fetch){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);try{const response=await fetchImpl(BASE+path,{signal:controller.signal});if(!response.ok)throw new Error('HTTP '+response.status);const body=await response.json();if(body?.code!==200||body?.status!=='OK'||body?.data==null)throw new Error('Invalid Quran API response');return body.data}catch(error){throw new Error(error.name==='AbortError'?'Quran API request timed out':error.message)}finally{clearTimeout(timer)}}
 export async function getSurahs(){
  try{
   const {loadVerifiedOfflineCorpus}=await import('./offline-assets.js');
@@ -13,6 +13,32 @@ export async function getSurahs(){
 }
 export const getMeta=()=>json('/meta');
 export const getJuz=(n)=>{if(!Number.isInteger(n)||n<1||n>30)throw new Error('Invalid Juz');return json('/juz/'+n+'/quran-uthmani')};
+// Offline-first Juz boundary: derived from the checksum-verified local corpus.
+// Returns the first (surah, ayah) of the requested Juz exactly as recorded in the
+// corpus, so no network request is needed. The offline corpus is only used after
+// full verification; the network fallback triggers on a clean 404 (no offline
+// corpus shipped), while any verification error is surfaced to the caller.
+export async function getOfflineJuzStart(n,{fetchImpl=globalThis.fetch}={}){
+ if(!Number.isInteger(n)||n<1||n>30)throw new Error('Invalid Juz');
+ const {loadVerifiedOfflineCorpus}=await import('./offline-assets.js');
+ const corpus=await loadVerifiedOfflineCorpus({fetchImpl});
+ for(const s of corpus.surahs){
+  for(const a of s.ayahs){
+   if(a.juz===n)return {surah:s.number,ayah:a.numberInSurah};
+  }
+ }
+ throw new Error('Juz boundary not found in offline corpus');
+}
+export async function getJuzStart(n,{fetchImpl=globalThis.fetch,offline=true}={}){
+ if(offline){
+  try{return await getOfflineJuzStart(n,{fetchImpl})}
+  catch(error){if(!/^Offline (asset|manifest) unavailable: 404$/.test(error.message))throw error}
+ }
+ const payload=await json('/juz/'+n+'/quran-uthmani',12000,fetchImpl);
+ const a=payload?.ayahs?.[0];
+ if(!Number.isInteger(a?.surah?.number)||!Number.isInteger(a?.numberInSurah))throw new Error('Juz payload boundary missing');
+ return {surah:a.surah.number,ayah:a.numberInSurah};
+}
 export function alignEditions(editions,expectedSurah){if(!Array.isArray(editions)||editions.length!==4)throw new Error('Missing Quran editions');const [arabic,english,tafsir,audio]=editions;const count=arabic?.ayahs?.length;if(!count||editions.some(e=>e?.ayahs?.length!==count))throw new Error('Verse count mismatch');if(expectedSurah!==undefined&&editions.some(e=>e?.number!==expectedSurah))throw new Error('Surah identity mismatch');return arabic.ayahs.map((a,i)=>{const b=english.ayahs[i],c=tafsir.ayahs[i],d=audio.ayahs[i];if(!Number.isInteger(a.number)||a.numberInSurah!==i+1||![b,c,d].every(x=>x?.number===a.number&&x?.numberInSurah===a.numberInSurah&&(!x.surah||x.surah.number===expectedSurah))||a.surah&&a.surah.number!==expectedSurah||![a.text,b.text,c.text].every(x=>typeof x==='string'&&x.length>0))throw new Error('Verse identity or text mismatch at index '+i);if(expectedSurah===2&&i===0&&!/^الٓ?مٓ?$/u.test(a.text.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'')))throw new Error('Canonical Quran anchor mismatch: 2:1');return {number:a.number,numberInSurah:a.numberInSurah,juz:a.juz,arabic:a.text,english:b.text,tafsir:c.text,audio:typeof d.audio==='string'&&d.audio.startsWith('https://')?d.audio:null}})};
 export async function getSurah(number){
  if(!Number.isInteger(number)||number<1||number>114)throw new Error('Invalid Surah');
