@@ -1,6 +1,11 @@
 name: Quran Arabic corpus acquisition audit
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - research/quran-tajweed-foundation-20261108
+    paths:
+      - .github/workflows/quran-corpus-acquisition-audit.yml
 
 permissions:
   contents: read
