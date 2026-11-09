@@ -16,6 +16,14 @@ export function validateTranslationSurah(payload,surah,edition,arabicVerses){
 }
 export async function loadTranslationSurah(surah,language,arabicVerses,{fetchImpl=globalThis.fetch,signal}={}){
  if(!Number.isInteger(surah)||surah<1||surah>114||!validLanguage(language)||!Array.isArray(arabicVerses)||!arabicVerses.length)throw Error('Invalid translation request');
+ if(language==='ms'){
+  try{
+   const {loadVerifiedOfflineSurah}=await import('./offline-assets.js');
+   const local=await loadVerifiedOfflineSurah(surah,{fetchImpl});
+   if(local.ayahs.length!==arabicVerses.length||local.ayahs.some((a,i)=>a.number!==arabicVerses[i]?.number||a.arabic!==arabicVerses[i]?.arabic))throw Error('Offline Arabic and Malay pairing mismatch');
+   return {edition:{identifier:'ms.basmeih',name:'Abdullah Muhammad Basmeih',language:'ms'},verses:new Map(local.ayahs.map(a=>[a.numberInSurah,a.malay]))};
+  }catch(error){if(!/^Offline (asset|manifest) unavailable: 404$/.test(error.message))throw error}
+ }
  const metadata=await fetchImpl(API+'/edition?format=text&language='+encodeURIComponent(language)+'&type=translation',{signal});
  if(!metadata.ok)throw Error('Edition metadata HTTP '+metadata.status);
  const meta=await metadata.json();if(meta?.status!=='OK')throw Error('Edition metadata unavailable');
