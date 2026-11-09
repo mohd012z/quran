@@ -9,3 +9,12 @@ test('Arabic search, verse-number search and bookmarks are deterministic',()=>{c
 test('Tajweed legend declares only supported reviewed annotation rule identifiers',()=>{assert.deepEqual(TAJWEED_RULES.map(x=>x.id),['madd','ikhfa','qalqala'])});
 
 test('translation language accepts supported values and rejects invalid persisted choices',()=>{for(const language of ['ms','id','en'])assert.equal(sanitizeReaderSettings({translationLanguage:language}).translationLanguage,language);assert.equal(sanitizeReaderSettings({translationLanguage:'unknown'}).translationLanguage,'ms')});
+
+test('offline Quran corpus rejects unreviewed manifest and mismatched SHA-256',async()=>{
+ const {verifyOfflineCorpus}=await import('../src/api.js');
+ const bytes=new TextEncoder().encode('{"surahs":[]}');
+ const digest=async()=>new Uint8Array(32).buffer;
+ await assert.rejects(verifyOfflineCorpus(bytes,{schema:1,arabicEdition:'quran-uthmani',translationEdition:'ms.basmeih',sha256:'f'.repeat(64)},{digest}),/SHA-256 mismatch/);
+ await assert.rejects(verifyOfflineCorpus(bytes,{schema:1,arabicEdition:'quran-uthmani',translationEdition:'ms.other',sha256:'0'.repeat(64)},{digest}),/Unreviewed/);
+ await assert.rejects(verifyOfflineCorpus(bytes,{schema:1,arabicEdition:'quran-uthmani',translationEdition:'ms.basmeih',sha256:'0'.repeat(64)},{digest}),/114 Surahs/);
+});
