@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - research/quran-tajweed-foundation-20261108
     paths:
       - '.github/workflows/android-apk.yml'
       - '.github/workflows/quran-corpus-acquisition-audit.yml'
