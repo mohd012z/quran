@@ -14,6 +14,10 @@ export function layoutQuranPayload(url){
  return null;
 }
 export async function installLayoutQuranMocks(page){
+ // The Vite SPA fallback can return index.html (HTTP 200) for absent offline files.
+ // Model a genuinely missing local package with 404 so offline-first loaders
+ // correctly use the synthetic API fixtures, never a fabricated corpus.
+ await page.route('**/offline/**',route=>route.fulfill({status:404,body:'Offline fixture not installed'}));
  const seen=[];await page.route('https://api.alquran.cloud/**',async route=>{
   const url=route.request().url(),payload=layoutQuranPayload(url);
   seen.push({endpoint:payload?'allowed':'rejected',handled:!!payload});
