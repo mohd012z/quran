@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{cardLines,createVerseCard}from '../src/verse-card.js';
+const verse={surah:1,ayah:1,arabic:'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'};
+function fakeDocument(){const operations=[];const ctx={measureText:t=>({width:t.length*12}),fillRect(){},strokeRect(){},fillText:(...args)=>operations.push(args)};return {operations,createElement:()=>({getContext:()=>ctx,set width(v){this._width=v},get width(){return this._width},set height(v){this._height=v},get height(){return this._height}})}}
+test('Arabic words wrap without changing their order or text',()=>{const input='بسم الله الرحمن الرحيم';const lines=cardLines(input,t=>t.length*10,100);assert.equal(lines.join(' '),input)});
+test('PNG card renders Arabic and exact Quran reference',()=>{const d=fakeDocument();const c=createVerseCard(verse,{documentObject:d});assert.equal(c.width,1080);assert.ok(c.height>=560);assert.ok(d.operations.some(x=>x[0].includes('بِسْمِ')));assert.ok(d.operations.some(x=>x[0]==='Al-Quran 1:1'));assert.ok(d.operations.some(x=>x[0]==='https://quran.com/1:1'))});
+test('card fails closed for missing text and overwide words',()=>{assert.throws(()=>createVerseCard({...verse,arabic:''},{documentObject:fakeDocument()}));assert.throws(()=>cardLines('longword',t=>t.length*100,20))});

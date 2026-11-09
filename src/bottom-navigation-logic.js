@@ -1,0 +1,4 @@
+export const NAV_ITEMS=Object.freeze([['baca','Baca','book-open'],['belajar','Belajar','graduation-cap'],['tarannum','Tarannum','music'],['solat','Solat & Wirid','moon-star'],['tetapan','Tetapan','settings']]);
+export const SETTINGS_DESTINATIONS=Object.freeze([['sejarah','Sejarah Nabi'],['kalendar','Kalendar Islam'],['doa','Doa Harian'],['ilmu','Ilmu Islam'],['rujukan','Rujukan']]);
+export function nextBottomNavVisibility({previousY,currentY,visible,threshold=12,focused=false,interacting=false}){if(focused||interacting)return true;if(!Number.isFinite(previousY)||!Number.isFinite(currentY))return true;if(currentY<80)return true;if(Math.abs(currentY-previousY)<threshold)return visible;return currentY<previousY}
+export function shouldIgnoreScroll({horizontal=false,touchDeltaX=0,touchDeltaY=0}={}){return horizontal||Math.abs(touchDeltaX)>Math.abs(touchDeltaY)}

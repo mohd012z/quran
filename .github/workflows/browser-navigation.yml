@@ -1,0 +1,43 @@
+name: Quran bottom navigation browser validation
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/quran-tajweed-foundation-20261108
+    paths:
+      - 'src/**'
+      - 'tests/browser-bottom-nav.spec.js'
+      - 'playwright.config.mjs'
+      - '.github/workflows/browser-navigation.yml'
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  browser-nav:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install browser testing dependencies
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Build and run browser tests
+        run: |
+          npm run build
+          npx playwright test --config=playwright.config.mjs
+      - name: Upload screenshots and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quran-bottom-navigation-browser-evidence
+          path: |
+            screenshots/
+            test-results/
+          if-no-files-found: warn

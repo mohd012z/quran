@@ -1,0 +1,68 @@
+name: Quran Arabic corpus acquisition audit
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/quran-tajweed-foundation-20261108
+    paths:
+      - .github/workflows/quran-corpus-acquisition-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify-corpus:
+    if: github.ref == 'refs/heads/research/quran-tajweed-foundation-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Retrieve and verify without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 - <<'PY'
+          import hashlib, json, pathlib, re, urllib.request
+          root = pathlib.Path("evidence")
+          mirror = "https://raw.githubusercontent.com/iptvchecker/content-tanzil/main/tanzil-uthmani-1.1.txt"
+          expected = "ac0724796cbbda0f4801470fbbd11d0f3c5802067bae0493466d0128b0c667af"
+          result = {"source":mirror,"mirror_claimed_sha256":expected,"verified":False}
+          try:
+              req=urllib.request.Request(mirror,headers={"User-Agent":"quran-research-verifier/1.0"})
+              with urllib.request.urlopen(req,timeout=30) as response:
+                  data=response.read(4_000_001)
+              if len(data)>4_000_000: raise ValueError("file exceeds size cap")
+              actual=hashlib.sha256(data).hexdigest()
+              result.update(bytes=len(data),sha256=actual,mirror_checksum_matches=(actual==expected))
+              if actual!=expected: raise ValueError("mirror SHA-256 mismatch")
+              text=data.decode("utf-8-sig")
+              if "Tanzil Quran Text" not in text or "Copyright" not in text: raise ValueError("Tanzil notice missing")
+              # Tanzil TXT is a plain one-ayah-per-line text, not pipe-delimited CSV.
+              # The chapter boundaries are independently checked against the
+              # standard 114-surah ayah-count table; Arabic bytes stay unchanged.
+              expected_counts=[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6]
+              lines=[line for line in text.splitlines() if line.strip() and not line.startswith("#")]
+              if len(lines)!=6236:raise ValueError(f"expected 6236 ayah lines, got {len(lines)}")
+              if len(expected_counts)!=114 or sum(expected_counts)!=6236:raise ValueError("invalid reference chapter counts")
+              if any(not any(0x0600<=ord(ch)<=0x06ff for ch in line) for line in lines):
+                  raise ValueError("non-Arabic ayah line")
+              result.update(ayahs=len(lines),surahs=len(expected_counts),surah_ayah_counts=expected_counts,structural_verification=True)
+              # Mirror parity alone is not publisher verification.
+              result["verified"]=False
+              result["reason"]="Official Tanzil publisher byte comparison not performed; do not publish"
+          except Exception as exc:
+              result["error"]=str(exc)
+          (root/"audit.json").write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps(result,indent=2,ensure_ascii=False))
+          if "error" in result:raise SystemExit(1)
+          PY
+      - name: Assert non-publishing gate
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          r=json.load(open("evidence/audit.json"))
+          assert r["structural_verification"] and r["mirror_checksum_matches"]
+          assert r["verified"] is False, "Publisher verification must be separate"
+          print("PASS: mirror structural audit only; publishing prohibited")
+          PY
