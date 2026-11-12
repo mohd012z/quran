@@ -1,0 +1,2 @@
+offline-sources/*.json filter=lfs diff=lfs merge=lfs -text
+offline-sources/*.txt filter=lfs diff=lfs merge=lfs -text

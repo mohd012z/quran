@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - research/quran-tajweed-foundation-20261108
     paths:
       - '.github/workflows/android-apk.yml'
       - '.github/workflows/quran-corpus-acquisition-audit.yml'
@@ -32,6 +33,22 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Assert Git LFS pulled real assets (no pointer files)
+        run: |
+          set -euo pipefail
+          # offline-sources/ is LFS-tracked and must be real files, not pointers.
+          if grep -rlq "version https://git-lfs.github.com/spec/v1" offline-sources/; then
+            echo "ERROR: Git LFS pointer files found in offline-sources/" >&2
+            exit 1
+          fi
+          # public/offline/ ships only the text corpus + manifests (no audio);
+          # it must be plain, pointer-free.
+          test -s public/offline/corpus.json
+          test -s public/offline/corpus-manifest.json
+          test -s public/offline/alafasy-manifest.json
+          test ! -e public/offline/alafasy
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -50,6 +67,15 @@ jobs:
           npm test
           npm run build
           test -f dist/index.html
+          # On-demand audio model: the bundle must contain ZERO audio files.
+          # Alafasy MP3s are downloaded per-verse at runtime from the pinned
+          # audio-pack (GitHub Pages) and cached in IndexedDB.
+          if find dist -name '*.mp3' -print -quit | grep -q .; then
+            echo "ERROR: MP3 files found in the web bundle; audio must be on-demand, not compiled in" >&2
+            find dist -name '*.mp3' -print
+            exit 1
+          fi
+          echo "OK: web bundle ships text + manifests only (no audio)"
       - name: Generate Capacitor Android wrapper
         run: |
           npm install --no-save --no-audit --no-fund @capacitor/core@6.2.1 @capacitor/cli@6.2.1 @capacitor/android@6.2.1
@@ -114,7 +140,7 @@ jobs:
           retention-days: 7
 
   verify-corpus:
-    if: github.ref == 'refs/heads/research/quran-tajweed-foundation-20261108' || github.head_ref == 'research/quran-tajweed-foundation-20261108'
+    if: github.ref == 'refs/heads/research/quran-tajweed-foundation-20261108' || github.head_ref == 'research/quran-tajweed-foundation-20261108' || github.head_ref == 'research/offline-corpus-bundle-20261109'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
